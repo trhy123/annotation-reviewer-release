@@ -1,4 +1,4 @@
-Annotation Reviewer 在开放源代码之前的试用通道。
+动物行为标注审阅与编辑工具 Annotation Reviewer 在开放源代码之前的试用通道。
 
 - [下载程序](https://github.com/trhy123/annotation-reviewer-release/releases)
 - [查看用户操作手册](docs/00_操作手册.md)
