@@ -54,7 +54,7 @@
 | Boutlist 列名设置 | `ui/data/boutlist_fields.py` | `core/reviewer_core.py::read_boutlist` |
 | Display/Profiler | `ui/data/display.py`, `ui/operations/profiler.py` | `rendering/`, `app/settings.py` |
 | History/恢复 | `ui/data/history.py`, `ui/recovery.py` | `core/session_recovery.py` |
-| 保存/导出 | `ui/operations/file.py`, `ui/file_dialogs.py`, `ui/export_window.py` | `workers/annotation_save.py`, `core/annotation_store.py`, `workers/video_export.py` |
+| 保存/导出 | `ui/operations/file.py`, `ui/file_dialogs.py`, `ui/export_window.py` | `workers/csv_save.py`, `workers/video_export.py` |
 | 英文悬停文案 | `ui/help_text.py` | `ui/widgets.py`, `ui/detection_controller.py` 的内容提示 |
 
 UI 页面通过普通 mixin 方法使用同一个 MainWindow 状态，不是彼此独立的窗口。移动方法前检查其 `self.*` 依赖和信号连接；不要为了拆分复制一套 Session、选择集合或撤销栈。
@@ -65,7 +65,7 @@ UI 页面通过普通 mixin 方法使用同一个 MainWindow 状态，不是彼�
 
 UI 调用 core、matching、tracking、media、rendering 和 workers。后台算法不能导入 MainWindow、页面类或 QWidget。后台任务使用 QtCore 信号并不意味着它属于 UI。
 
-`workers/` 包含 SQLite 保存、视频导出、匹配和解码任务。输入应为快照或任务数据，输出通过已有信号/队列发布；不能从工作线程读取正在变化的控件值。
+`workers/` 包含 CSV 保存、视频导出、匹配和解码任务。输入应为快照或任务数据，输出通过已有信号/队列发布；不能从工作线程读取正在变化的控件值。
 
 模型推理由独立 DetectionWorker 承载。GUI 不为读取模型信息或预览配置直接导入 torch/ultralytics。ROI Assist 与全视频检测需要遵循现有互斥/排队规则，避免无意中在同一设备加载多份模型。
 
@@ -95,7 +95,7 @@ ID 与来源 UID 有不同作用：ID 是对象身份，来源 UID 用来追踪�
 
 1. TrackingBuffer、Trajectory 和 Continuous 在提交前使用轻量局部历史。
 2. Finish/Apply 将一组修改提交为相应 EditCommand/History 事务。
-3. 磁盘 SQLite/恢复快照由独立保存任务写入。
+3. 磁盘 CSV/恢复快照由独立保存任务写入。
 
 逐帧追踪不能每次深拷贝整个 Session 或写完整 History 快照。修改回放/撤销时同时测试新建、覆盖、单点删除、范围删除、Redo 和取消。
 
@@ -103,31 +103,15 @@ ID 与来源 UID 有不同作用：ID 是对象身份，来源 UID 用来追踪�
 
 `info_points`、`info_events`、`scale_calibration`、Camera 数据、手工绑定数据和位置来源是文件契约，不是 Python 模块名称。事件使用统一起止帧结构；点事件 start=end。
 
-完整 Scale JSON 写入结果数据库 metadata；Boutlist 可按映射保存简短尺度摘要和完整 JSON，两者独立启用，只更新用户确认的当前行。`core/boutlist_fields.py` 负责规范字段到实际列名的映射；读取和写入必须使用同一映射，空映射停用，重复目标列拒绝。
+完整 Scale JSON 写入标注输出；Boutlist 可按映射保存简短尺度摘要和完整 JSON，两者独立启用，只更新用户确认的当前行。`core/boutlist_fields.py` 负责规范字段到实际列名的映射；读取和写入必须使用同一映射，空映射停用，重复目标列拒绝。
 
 ### 5.4 Display 设置事务
 
 `display_settings_values()` 收集界面草稿，`display_settings_group()` 定义持久化键所属分组。启动时保存有效值快照；恢复相同值后不再标记未保存。Save settings 只写选中范围，成功后更新该范围快照。Boutlist 列名只在写入成功后替换 `_boutlist_field_mapping`；数据读写不可直接读取列名输入框。
 
-BoutSelect 显示 `read_boutlist(raw_columns=True)` 的原始列名、顺序和单元格文本；同一读取结果另经 `canonical_columns()` 生成内部视图，消费映射列而不保留重复别名。显示不能直接使用内部视图。Boutlist 读入冲突及双向同步统一使用 `boutlist_values_equal()`；整数身份/帧号精确比较，浮点允许序列化误差，JSON 递归比较。文件自身的 `annotation_metadata` 与推断 Boutlist 元数据分开，空 SQLite 也须保留文件元数据参与比较。简单比例不得取代结构化标定；有效完整标定可整体选择，比例与标定同步为一组。
-
 ### 5.5 关联文件打开
 
 标注→视频自动关联由 `core/annotation_links.py` 解析容器无关的来源字典，`ui/operations/file.py::auto_open_annotation_video` 负责读取当前标注/Boutlist 来源和候选选择。新存储格式应提供来源字典并复用该入口，不能在解析器里假定所有 SQLite 都是审阅标注。现有 SQLite raw cache 继续使用专用预览入口。
-
-### 5.6 SQLite 结果文件
-
-`core/annotation_store.py` 定义带 application_id 与 schema version 的结果库；不要仅凭 `.sqlite` 后缀把结果库当作 raw 缓存。`AnnotationSession.load_csv()` 保留内部入口名称，按格式读取旧 CSV 或 reviewed_detections 到同一 DataFrame。该名称及 session.csv_path 不作为磁盘格式判断依据；恢复 pickle 和编辑算法沿用原契约。
-
-每视频一个结果库，内含 frames/raw_detections、raw_metadata、reviewed_detections、raw_sources、metadata、events、history、history_commands、manual_edits 和 save_transactions。raw_sources 只记录来源，不承担外部依赖。metadata 的 raw_storage=embedded 时，载入器将 raw_cache 解析为当前库路径，不能持久化对自身文件名的依赖。稳定 `_review_uid` 必须持久化，不能在每次载入时重建。首行 compact JSON 在磁盘提升到 metadata，载入时重构同名内存列以复用现有控件与算法；空工作表也必须保存元数据。
-
-ResultStore 使用单写者 WAL/FULL 事务。普通 Save 通过 Session 的 UID 变更记录冻结新增/修改行与删除 UID，`save_delta()` 仅读取和更新这些行，同时提交 metadata/events/history 与增删改审计；成功仅清理该保存版本的变更，保留后台保存期间的新编辑。加载行与 save_revision 来自同一读事务，保存拒绝覆盖其他实例提交的新版本；文档加载世代保护旧保存任务不会改写新文档的路径。所有 schema/行/审计修改同一事务回滚，关闭写连接时 checkpoint；只读连接不得忽略活跃 WAL。
-
-首次导入、另存新文件、Undo/Redo 重建、Camera 全表变化和未跟踪的外部物化修改使用完整比较回退。未变化的命令归档不重复复制或编码；变化的 History payload 仍可能较大，不能宣称整个保存过程严格只与脏行数有关。重开后的 history_commands 保持只读。现有内容寻址 pickle 恢复机制保留，恢复后首次保存使用完整比较。
-
-Save/Ctrl+S 写回当前 SQLite；CSV 输入首次保存需要选择 SQLite。Save as/Ctrl+Shift+S 默认名带日期时间，可选择新 SQLite 或 Legacy CSV；Save 默认名不追加时间。CSV 仅作兼容导出，不切换当前工作库、不清除脏状态、不回写 boutlist detection_file。CSV 输出公开字段、首行 compact JSON、metadata.json 与只读 edit_log，不带 raw/命令归档/行审计。区间导出设置只在 Save as 生效，不能覆盖当前完整库或其他已有项目文件。source_annotation_path 保留每行来源，旧库首次保存允许全量升级该字段。人工新增/插值行不继承模板 raw 行引用；绑定对齐改变结果帧时用 raw_frame 保留原始观测帧。不同 raw_source_id 的项目不允许追加，防止外来 raw ordinal 误指当前 raw；没有可验证 raw 身份的旧 CSV 追加保留 legacy_raw_det_index/legacy_raw_frame 诊断，但不建立当前 raw 行关联。额外列名不能仅大小写不同，保存会明确拒绝并保持原库。
-
-DetectionWorker 与批量入口使用同一个数据库连接写 raw 与 reviewed；raw_metadata 的 state 描述推理缓存，metadata 的 state 描述处理结果。先提交 raw 批次，再提交引用该批次的工作行；允许中断时 raw 比 reviewed 超前，不允许 reviewed 引用未提交 raw。Raw only 使用同样的工程格式，has_reviewed=false 时走只读 raw 预览；正常打开 reviewed 不可切换为 raw 预览。暂停/中断先提交 pending rows 再发布事件，最终清理以一个结果事务替换被修正行。raw_det_index 与 frame 对应 raw 中的 det_index；插值/人工新增不伪造 raw 来源索引。GUI 通过 prepare_save 冻结所需行，AnnotationSaveWorker 在后台线程写出，维持当前 snapshotReady 协议。命令参数含 DataFrame、数组、整数键和元组时使用 JSON 类型编码，禁止将 pickle 作为 SQLite 的载入协议。history_commands 归档参数及撤销状态，不重新注入当前撤销栈。另存新文件通过 SQLite backup 继承 raw 和审计记录后同步工作表；旧独立 raw 导入只复制一次，事务失败不得留下半份 raw。CSV 保留为兼容输入/导出，Boutlist 和外部人工轨迹格式不在结果格式迁移范围。检测启动配置及控制文件位于系统临时目录，结果配置存储于库内 metadata。
 
 ## 6. 帧身份与时间轴
 

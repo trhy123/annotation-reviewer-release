@@ -43,8 +43,6 @@ Match 与 Tracking 的模板搜索不同，也与 Edit → ID 的直接改号不
 
 ## 7.3 Alignment：时间与空间对齐
 
-时间轴的对齐算法为：capture_frame + sign * (trk_frame - trk_capture_frame) * det_fps / trk_fps，其中 trk_reverse=True 时 sign=-1。
-
 ### 7.3.1 参数表
 
 | 界面项目 | 含义与单位 |
