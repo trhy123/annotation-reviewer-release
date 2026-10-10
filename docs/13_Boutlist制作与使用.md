@@ -17,7 +17,7 @@ Boutlist 是普通 CSV 表，每行组织一个需要审阅的 bout：视频、�
 5. 保存后，在 Display → Boutlist fields 配置列名映射，再 Open Boutlist。
 6. 用一行试开并检查同步结果，确认后批量组织其他记录。
 
-**最小示例：**
+**示例：**
 
 ```csv
 bout_id,origin_video_file,detection_file,analysis_start_frame,analysis_end_frame,capture_frame
@@ -37,9 +37,11 @@ trial02,E:/videos/clip02.MP4,,1,950,930
 - 列名输入框为草稿。只有范围选为 All 或 Boutlist fields 并点击 Save settings 后，映射才写入 `settings.ini`，并从本次会话开始生效。保存其他分组不会应用这组草稿。
 - 未保存时打开或回写 Boutlist，继续使用上一次保存的映射。恢复为已保存值后，未保存提示自动消失。
 - 改映射不会直接重命名或重写 CSV 列。
+- Open Boutlist 选择窗口按 CSV 原始列名和原始列顺序显示，包括未映射的自定义列；内部规范字段只用于读取和回写，不额外显示一份。`setting.ini` 中的 `column_widths` 仅控制列宽，不控制列顺序。
 - 更改后应重新打开当前 boutlist 记录，避免沿用旧映射选行时的快照。
+- 直接打开标注文件时，元数据查找沿用已选 Boutlist；未选记录时使用当前配置的 Boutlist 路径，不沿用启动时的旧默认路径。
 
-**例：** 表格列名为 `Video`、`Start`、`Capture`，分别填入 origin_video_file、analysis_start_frame、capture_frame 对应文本框。程序仍把它们理解为视频路径、分析开始帧和捕获帧；输出标注 SQLite 的规范字段名不改变。
+**例：** 如果视频路径、分析开始帧和捕获帧这三个字段在表格中的列名分别为 `Video`、`Start`、`Capture`，将它们分别填入 origin_video_file、analysis_start_frame、capture_frame 对应的文本框，则程序会将其理解为视频路径、分析开始帧和捕获帧，选择窗口显示实际列名，并在回写时只更新映射的新列而不会补出旧列；程序内部使用的变量名称和输出标注 SQLite 的规范字段名不改变。
 
 ## 13.4 可映射字段
 
@@ -101,6 +103,12 @@ Open Boutlist → 选择记录 → 核对 File 中实际路径 → 检查 Points
 4. 完成后重新读取这一行验证。
 
 Sync from 会把表中内容重新带入对应元数据。若当前会话有更准确的新值，应先判断是否需要覆盖。取消回写不意味着撤销已经保存到标注 SQLite 的结果。
+
+读取冲突、Sync from 和 Sync to 共用数值比较：普通浮点数允许保存舍入误差（相对容差 `1e-7`、绝对容差 `5e-7`）；JSON 内浮点使用相对 `1e-7`、绝对 `1e-12`，JSON 键顺序不影响一致性。帧号、身份等整数仍精确比较；缺失或停用的映射不会在同步时清除现有值。精度差异一致时保留标注文件原有精度，不提示覆盖，也不为此重写 Boutlist。
+
+`scale_px_per_cm` 只代表固定比例或完整标定的近似平均摘要。标注已含标定线、局部场或矩阵模型时，Boutlist 的简单比例不会触发替换完整标定的提示，Sync from 也不把它变成固定比例。
+
+Boutlist 配置并提供有效完整 `scale_calibration` 时，可以与标注完整标定比较；真正不一致时再选择来源，默认保留标注。只有固定单值标尺时，选择新比例会同时更新比例和对应单值标定。
 
 ## 13.6 写入边界与文本保留
 
