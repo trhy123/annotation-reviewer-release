@@ -1,18 +1,14 @@
-# Annotation Reviewer
-
 Annotation Reviewer 在开放源代码之前的试用通道。
 
-视频标注审核与检测工具，支持 Windows、macOS 和 Linux。
+- [下载程序](https://github.com/trhy123/annotation-reviewer-release/releases)
+- [查看用户操作手册](docs/00_操作手册.md)
+- [查看架构与数据约定文档](ARCHITECTURE.md)
 
-- [下载程序及查看全部版本](https://github.com/trhy123/annotation-reviewer-release/releases)
-- [用户操作手册](docs/00_操作手册.md)
-- [程序架构与数据约定](ARCHITECTURE.md)
-
-请在 Releases 中选择版本和平台下载。合并的 PDF 用户文档如已提供，也在对应版本的附件中。
+请在 Releases 中选择版本和平台下载。离线用户文档 PDF 也在 Release 的附件中。
 使用同一版本的 `SHA256SUMS.txt` 校验平台压缩包；分卷包请同时下载该版本的重组说明。
 各版本标签保留对应版本的文档；仓库自动生成的 Source code 压缩包只包含本仓库的文档。
 
-此仓库用于提供试用程序和文档，程序源代码尚未开放。
+此仓库用于提供试用程序和文档，源代码仓库尚未开放。
 
 ---
 
@@ -184,7 +180,9 @@ build-output/    # 可删除的 PyInstaller 中间文件
 release/         # 最终目录和压缩包
 ```
 
-## 发布版本与文件名
+## 版本发布
+
+所有版本都具备相同的应用功能，只是 YOLO 检测器的硬件加速推理方式有区别：CUDA 版本支持在 NVIDIA GPU 和 CPU 上进行推理处理，而 CPU 版本则仅支持在 CPU 上进行处理。对于 macOS 系统，如果硬件支持 Metal 框架，原生版本还支持通过 GPU 进行加速处理。如不需要或无法使用 NVIDIA GPU 进行推理，下载 CPU 版本即可。
 
 Actions 的 `Optional release tag; blank uses build-<run number>` 同时决定 Release tag、发布目录和下载文件的版本后缀。例如输入 `0.55`，Windows CPU 版生成 `AnnotationReviewer-windows-amd64-cpu-0.55/` 和同名 `.zip`；CUDA 版使用同样后缀的 `.7z`。留空时使用 `build-<run number>`。Actions artifact 名称同样包含该后缀。
 
@@ -196,7 +194,7 @@ Actions 的 `Optional release tag; blank uses build-<run number>` 同时决定 R
 - macOS：macOS 13 Ventura 或更新版本；分别提供 Apple Silicon 和 Intel 构建
 - Linux：x86-64，建议 Ubuntu 22.04 或具有相近/更新 glibc 的发行版
 
-不维护 Windows 7、Windows 8.1、32 位版本或单独的 macOS 12 兼容构建。
+不维护 32 位、Windows 7、Windows 8.1 版本或单独的 macOS 12 兼容构建。
 
 ## 使用说明
 
