@@ -6,7 +6,7 @@
 
 Points 记录分析边界、捕获参考帧、主体身份、巢门口和审阅备注；Events 记录行为或数据质量事件区间。它们是人工采集信息，不由轨迹自动推断实验结论。
 
-保存标注 SQLite 时，基础信息写入 `info_points`，事件写入 `info_events`。基础字段可按映射同步到 boutlist；事件区间不因 Sync to 自动逐项展开为 boutlist 列。完整标尺另存于 `scale_calibration`。
+保存标注 SQLite 时，基础信息写入 `info_points`，事件写入 `info_events`。基础字段可按映射同步到 Boutlist；事件区间不因 Sync to 自动逐项展开为 Boutlist 列。完整标尺另存于 `scale_calibration`。
 
 ## 11.2 Points 的 Set 与 Goto
 
@@ -49,7 +49,7 @@ Notes 用于记录影响理解和分析的简短事实，例如遮挡不确定�
 4. 分别点 Captor、Victim，再在画布选正确框。
 5. 点 Hive，在画面指定巢门口参考位置。
 6. 切回 goto point，逐项点击验证记录正确。
-7. 需要时填写 Notes，并同步 boutlist，最后保存标注文件。
+7. 需要时填写 Notes，并同步 Boutlist，最后保存标注文件。
 
 **例：视频开始时胡蜂已持续施压。** Start 使用实际可用分析起点，核验窗口勾选起点左截断；不要虚构一个画面外起点。Capture 仍按真实成功接触帧记录。
 
@@ -57,7 +57,7 @@ Notes 用于记录影响理解和分析的简短事实，例如遮挡不确定�
 
 | 显示/存储类型 | 标注判据 | 不应据此标注的情况 |
 | --- | --- | --- |
-| conspecific_interference | 得手胡蜂因其他胡蜂发生追逐、回避、驱赶或停止蜜蜂导向活动 | 仅同框出现 |
+| conspecific_interference | 得手胡蜂暂停蜜蜂导向活动，转而追逐、回避、驱赶其他胡蜂 | 仅同框出现 |
 | noncaptor_engagement | 非得手胡蜂主动接近、悬停、往复或向蜜蜂群施压 | 单纯飞过而无相关活动 |
 | bee_slip | 蜜蜂突然向下移动，形成新的低位/孤立机会 | 仅检测框抖动 |
 | loss_or_blur | 严重运动模糊、遮挡或群体检测坍缩，使空间点集明显不可靠 | 个别轻微漏检 |
@@ -98,6 +98,6 @@ Confirm 提交勾选结果并继续相应流程；Back 放弃本次核验操作�
 
 ## 11.8 同步和验收
 
-Sync from/to 使用 Display 中配置的 boutlist 字段映射；Hive 在 boutlist 中按程序映射使用 nest 坐标列。同步前核对当前行，空白映射字段不读写。保存后重新载入，检查 Start/End/Capture、Captor/Victim、Hive、四项布尔状态、Notes 和事件区间。
+Sync from/to 使用 Display 中配置的 Boutlist 字段映射；Hive 在 Boutlist 中按程序映射使用 nest 坐标列。同步前核对当前行，空白映射字段不读写。保存后重新载入，检查 Start/End/Capture、Captor/Victim、Hive、四项布尔状态、Notes 和事件区间。
 
 Points 的 Boutlist 同步只处理已映射且实际存在的字段，未提供的列不会清除当前身份、核验或 Camera 状态。数值保存精度差异不作为冲突；已有完整 Scale 标定不会被简单 `scale_px_per_cm` 摘要替换。完整标定的来源选择见 [Scale](09_Scale操作说明.md#98-单值范围和完整输出)，字段和比较规则见 [Boutlist](13_Boutlist制作与使用.md#135-打开与同步规程)。

@@ -31,7 +31,7 @@ Match 与 Tracking 的模板搜索不同，也与 Edit → ID 的直接改号不
 
 ### 7.2.1 从 Boutlist 导入
 
-先配置 boutlist 列映射，再打开记录。程序可读取人工轨迹路径、Tracker capture 帧、视频 capture 帧、Tracker 帧率、起止范围、倒放标志及偏移等信息。核对读取到的字段，再检查画面上的人工点。
+先配置 Boutlist 列映射，再打开记录。程序可读取人工轨迹路径、Tracker capture 帧、视频 capture 帧、Tracker 帧率、起止范围、倒放标志及偏移等信息。核对读取到的字段，再检查画面上的人工点。
 
 ### 7.2.2 单独导入
 
@@ -58,7 +58,7 @@ Match 与 Tracking 的模板搜索不同，也与 Edit → ID 的直接改号不
 | x/y offset | 人工点在原图坐标中的像素偏移，X 向右为正、Y 向下为正 |
 | Auto set offset | 按当前 timing 信息重新准备人工数据并估计对齐，可能改写现有偏移（frame/x/y offset），改写前会弹窗确认 |
 | Preview points | 使用当前偏移刷新人工点预览，不等于生成最终绑定 |
-| Sync from / Sync to | 从所选 boutlist 记录读取或向其回写相关对齐字段 |
+| Sync from / Sync to | 从所选 Boutlist 记录读取或向其回写相关对齐字段 |
 
 ### 7.3.2 推荐操作规程
 

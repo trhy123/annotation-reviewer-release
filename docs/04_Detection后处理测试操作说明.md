@@ -106,7 +106,7 @@ settings.ini 保存的是参数和选择，不是 Python 算法。预设为数�
 
 **Full replay** 从缓存起点计算到最后已提交帧并执行最终清理，自动显示结果，同时生成独立结果 SQLite。缓存不完整时只处理已有范围，不补造缺失帧，也不自动重新跑 YOLO。
 
-选择 `实验5/csv` 为输出目录时，试验结果写入同级 `实验5/postprocess_lab`。局部试验保存临时 preview.sqlite；全片结果保存一个自包含 SQLite 工程，包含 raw、final、试验预览与诊断表，metadata 保存配置与 provenance，不另存 result.json。可重复使用的 features.sqlite 属于试验工作缓存，不是最终结果文件。原视频、boutlist、原 raw、既有审阅 SQLite 保持不变。
+选择 `实验5/csv` 为输出目录时，试验结果写入同级 `实验5/postprocess_lab`。局部试验保存临时 preview.sqlite；全片结果保存一个自包含 SQLite 工程，包含 raw、final、试验预览与诊断表，metadata 保存配置与 provenance，不另存 result.json。可重复使用的 features.sqlite 属于试验工作缓存，不是最终结果文件。原视频、Boutlist、原 raw、既有审阅 SQLite 保持不变。
 
 常驻回放进程复用 raw 输入和与关联参数无关的图像特征。每次试验都重置身份状态；不会复用旧参数算出的轨迹。解码缓存有限容量，不能保证长窗口即时完成。
 

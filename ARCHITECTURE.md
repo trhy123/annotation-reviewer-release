@@ -91,7 +91,11 @@ Tracking、精确 seek、后处理试验等任务带有世代、帧或会话身�
 
 ID 与来源 UID 有不同作用：ID 是对象身份，来源 UID 用来追踪具体源行的消费/恢复。Match 解绑、重绑定与冲突判断不能仅依赖数值 ID。
 
-### 5.2 三层撤销
+### 5.2 浏览记录
+
+`ui/browse_history.py` 维护当前视频的帧位置和对象选择两套瞬时记录。人工导航入口用 `browse_navigation`，对象选择入口用 `browse_selection`；播放显示不入栈，内部撤销定位用 `browse=False`。恢复期间使用抑制守卫，避免重复入栈。进度条按一次拖动记账，连续步进按 500 ms 合并。索引完成时协调图片引用，具体人工点保留对应图片身份；整条人工轨迹仅存轨迹名。不能把浏览操作加入 Session.commands。
+
+### 5.3 三层撤销
 
 1. TrackingBuffer、Trajectory 和 Continuous 在提交前使用轻量局部历史。
 2. Finish/Apply 将一组修改提交为相应 EditCommand/History 事务。
@@ -99,23 +103,27 @@ ID 与来源 UID 有不同作用：ID 是对象身份，来源 UID 用来追踪�
 
 逐帧追踪不能每次深拷贝整个 Session 或写完整 History 快照。修改回放/撤销时同时测试新建、覆盖、单点删除、范围删除、Redo 和取消。
 
-### 5.3 元数据契约
+### 5.4 元数据契约
 
 `info_points`、`info_events`、`scale_calibration`、Camera 数据、手工绑定数据和位置来源是文件契约，不是 Python 模块名称。事件使用统一起止帧结构；点事件 start=end。
 
 完整 Scale JSON 写入结果数据库 metadata；Boutlist 可按映射保存简短尺度摘要和完整 JSON，两者独立启用，只更新用户确认的当前行。`core/boutlist_fields.py` 负责规范字段到实际列名的映射；读取和写入必须使用同一映射，空映射停用，重复目标列拒绝。
 
-### 5.4 Display 设置事务
+### 5.5 Boutlist 编辑
+
+`ui/boutlist_dialog.py` 提供非模态 Select bout，`core/boutlist_edit.py` 提供原始文本单元格事务和每文件的独立 Undo/Redo。主窗口持有编辑器，关闭对话框或切换 Bout 不销毁撤销记录；退出程序不持久化。直接单元格编辑不走规范字段映射或标注 History。成功的程序内元数据回写须通知编辑器刷新；其他外部变更通过内容版本检查拒绝覆盖，显式刷新后清除过期记录。调整快捷键时同时检查主窗口、独立对话框和单元格编辑器的焦点优先级。
+
+### 5.6 Display 设置事务
 
 `display_settings_values()` 收集界面草稿，`display_settings_group()` 定义持久化键所属分组。启动时保存有效值快照；恢复相同值后不再标记未保存。Save settings 只写选中范围，成功后更新该范围快照。Boutlist 列名只在写入成功后替换 `_boutlist_field_mapping`；数据读写不可直接读取列名输入框。
 
-BoutSelect 显示 `read_boutlist(raw_columns=True)` 的原始列名、顺序和单元格文本；同一读取结果另经 `canonical_columns()` 生成内部视图，消费映射列而不保留重复别名。显示不能直接使用内部视图。Boutlist 读入冲突及双向同步统一使用 `boutlist_values_equal()`；整数身份/帧号精确比较，浮点允许序列化误差，JSON 递归比较。文件自身的 `annotation_metadata` 与推断 Boutlist 元数据分开，空 SQLite 也须保留文件元数据参与比较。简单比例不得取代结构化标定；有效完整标定可整体选择，比例与标定同步为一组。
+BoutSelect 显示 `BoutlistEditor` 读取的原始列名、顺序和单元格文本；打开 Bout 与元数据同步另经 `read_boutlist()` 和 `canonical_columns()` 生成内部视图，消费映射列而不保留重复别名。显示不能直接使用内部视图。Boutlist 读入冲突及双向同步统一使用 `boutlist_values_equal()`；整数身份/帧号精确比较，浮点允许序列化误差，JSON 递归比较。文件自身的 `annotation_metadata` 与推断 Boutlist 元数据分开，空 SQLite 也须保留文件元数据参与比较。简单比例不得取代结构化标定；有效完整标定可整体选择，比例与标定同步为一组。
 
-### 5.5 关联文件打开
+### 5.7 关联文件打开
 
 标注→视频自动关联由 `core/annotation_links.py` 解析容器无关的来源字典，`ui/operations/file.py::auto_open_annotation_video` 负责读取当前标注/Boutlist 来源和候选选择。新存储格式应提供来源字典并复用该入口，不能在解析器里假定所有 SQLite 都是审阅标注。现有 SQLite raw cache 继续使用专用预览入口。
 
-### 5.6 SQLite 结果文件
+### 5.8 数据结果保存
 
 `core/annotation_store.py` 定义带 application_id 与 schema version 的结果库；不要仅凭 `.sqlite` 后缀把结果库当作 raw 缓存。`AnnotationSession.load_csv()` 保留内部入口名称，按格式读取旧 CSV 或 reviewed_detections 到同一 DataFrame。该名称及 session.csv_path 不作为磁盘格式判断依据；恢复 pickle 和编辑算法沿用原契约。
 
