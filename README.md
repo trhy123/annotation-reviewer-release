@@ -15,6 +15,7 @@
 # Annotation Reviewer
 
 <img width="940" height="599" alt="Annotation Reviewer UI view1" src="https://github.com/user-attachments/assets/107f39c8-4c12-465b-ba7f-57b33ad582b9" />
+
 跨平台 Qt 视频标注审核工具，包含独立打包的 YOLO `DetectionWorker`。程序用于视频播放、标注呈现与编辑、手工轨迹对齐匹配、检测结果审核及带标注视频导出。每视频一个 SQLite 结果文件，包含 raw、final、metadata 和历史命令；旧 CSV 可导入。Save 写回当前 SQLite，Save as 默认带日期时间，可另存 SQLite 或兼容导出旧 CSV。
 
 
