@@ -1,5 +1,5 @@
 {
-  "source_commit": "92a987b89928634aa546594a485d698c5bcd79b0",
-  "source_ref": "refs/tags/0.60",
-  "release_tag": "0.60"
+  "source_commit": "25d21cbf7b0be44afe937e7c98b914c1360227c9",
+  "source_ref": "main",
+  "release_tag": null
 }
