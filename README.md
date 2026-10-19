@@ -2,7 +2,6 @@
 
 - [下载程序](https://github.com/trhy123/annotation-reviewer-release/releases)
 - [查看用户操作手册](docs/00_操作手册.md)
-- [查看架构与数据约定文档](ARCHITECTURE.md)
 
 请在 Releases 中选择版本和平台下载。离线用户文档 PDF 也在 Release 的附件中。
 使用同一版本的 `SHA256SUMS.txt` 校验平台压缩包；分卷包请同时下载该版本的重组说明。
