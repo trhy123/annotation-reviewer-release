@@ -10,8 +10,6 @@ Points 记录分析边界、捕获参考帧、主体身份、巢门口和审阅�
 
 ## 11.2 Points 的 Set 与 Goto
 
-`set point` 和 `goto point` 为互斥模式。同一个按钮在两种模式下作用不同，操作前先核对当前模式。
-
 | 按钮 | set point | goto point |
 | --- | --- | --- |
 | Start | 将当前帧设为分析开始 | 定位已存开始帧 |
@@ -21,9 +19,19 @@ Points 记录分析边界、捕获参考帧、主体身份、巢门口和审阅�
 | Captor | 点选得手胡蜂框，记录其 ID | 选中该 ID，必要时定位其最近存在帧 |
 | Victim | 点选被捕蜜蜂框，记录其 ID | 选中该 ID，必要时定位其最近存在帧 |
 
+`set point` 和 `goto point` 为互斥模式。同一个按钮在两种模式下作用不同，操作前先核对当前模式。
+
+Start、End、Capture 的 Confirm edit 窗口中，Yes 设置当前帧，Clear 清除对应字段，No 放弃；修改与清除均可通过主 History 撤销。提交修改或清空 Start、End、Capture、Hive、Captor、Victim 时，检查已启用映射的 Boutlist 字段；存在差异时询问是否同步，确认清空则写入空单元格，拒绝同步不回滚程序内的编辑。清除 End 后分析范围仍可按已有 Capture 或视频边界采用缺省终点，应区分显式记录与范围计算的缺省值。
+
+Hive、Captor、Victim 使用待提交选择。点击按钮进入选择状态，按钮保持按下；在画面内选择 Hive 坐标或正确对象框，按钮文字显示候选值；点击画面以外的主窗口其他位置清空候选，按钮文字显示空值；再次点击同一按钮提交，Esc 放弃候选。除同一提交按钮外的窗口区域均可用于清空候选，原数据在提交前保留。Hive 不再使用画面外位置设置坐标。
+
+进入 Hive 设置后，首次画面点选前坐标轴预览随鼠标移动；点击后预览固定在候选原点，直至重新点选、提交或取消。仅载入视频而没有标注时也可使用该预览。预览使用当前 Axis 外观与 Camera 坐标变换，不改变 Axis 显示开关，也不提前写入 Hive 数据。
+
 在进度条下方标记区点击 Start、End 符号正下方与 Capture 箭头同高的位置，也可定位到对应帧。定位到已经设置的 Start、End 或 Capture 帧时，画面左下角按 Events 的 HUD 样式显示相应文字。同一帧兼有多个标记或事件时，标签同时显示。播放预览与启用 HUD 的视频导出使用一致的标签规则。
 
 另设有 Notes 输入框用于记录影响理解和分析的简短事实，例如遮挡不确定性或特殊片段条件。
+
+Points 第三行的 `Save only the target segment` 控制 Save 与 Save as 是否仅保存 Start–End 内的最终标注，包含两端；不删除范围外内存数据。该选项为当前会话的保存范围选择，不作为配置项写入 INI，关闭或更换文件时复位。
 
 ## 11.3 各信息字段的含义
 
@@ -48,8 +56,8 @@ Points 记录分析边界、捕获参考帧、主体身份、巢门口和审阅�
 1. 先校正关键主体的身份与轨迹。
 2. 切换 set point，定位互动开始帧并点 Start。
 3. 定位成功捕获过程，逐帧确定 Capture；按分析范围设置 End。
-4. 分别点 Captor、Victim，再在画布选正确框。
-5. 点 Hive，在画面指定巢门口参考位置。
+4. 分别点 Captor、Victim，在画布选正确框后，再点同一按钮提交。
+5. 点 Hive，在画面指定巢门口参考位置，再点 Hive 提交。需要清除时，进入对应选择状态、点击画面外主窗口区域，再点原按钮提交。
 6. 切回 goto point，逐项点击验证记录正确。
 7. 需要时填写 Notes，并同步 Boutlist，最后保存标注文件。
 
@@ -87,9 +95,15 @@ bee_slip 记录事件时间，不要求确定蜜蜂长期 ID。事件不自动�
 
 ## 11.7 Verify 与保存核验
 
-Events 的 Verify 和 Save / Save as 前的核验窗口记录四项独立状态。勾选表示 true，未勾选表示 false；不要求为了允许保存而全部勾选。
+Events 的 Verify 和 Save / Save as 前的核验窗口记录独立的 bout 状态。窗口内项目勾选表示 true，未勾选表示 false；不要求为了允许保存而全部勾选。
 
-Confirm 提交勾选结果并继续相应流程；Back 放弃本次核验操作，在保存流程中会取消继续保存。`Export only the target segment` 仅在 Save as 时控制 SQLite 或 CSV 输出是否限制到 Start–End，不会删除范围外内存数据；Save 始终写回完整工作数据。
+Confirm 提交窗口中已显示项目的结果并继续相应流程；Back 放弃本次核验操作，在保存流程中会取消继续保存。未显示的项目保留当前 bout 中已有的值。
+
+核验窗口不包含保存范围选项。默认焦点位于 Confirm，按空格可提交确认；此时不触发 Tracking 的空格快捷键。
+
+Display → Boutlist fields 提供 Verify review status before saving 总开关。关闭后 Save／Save as 不自动弹出核验窗口，保留原有核验状态；仍可在 Events 点击 Verify 主动打开核验窗口。
+
+总开关下方的四项复选框决定是否在核验窗口询问相应项目，不表示当前 bout 的实际状态。取消勾选后不显示该项，也不清空其已存状态；全部取消时，核验窗口没有检查项目，仅保留 Confirm/Back。总开关和四项询问开关可由 Save settings 的 Boutlist fields 或 All 范围保存到 INI；实际 bout 状态仍通过核验窗口修改，进入项目 History 和结果 SQLite。右侧列名映射只控制 Boutlist 读写，须 Save settings 后生效。
 
 ### 11.7.1 核验建议
 
@@ -100,6 +114,6 @@ Confirm 提交勾选结果并继续相应流程；Back 放弃本次核验操作�
 
 ## 11.8 同步和验收
 
-Sync from/to 使用 Display 中配置的 Boutlist 字段映射；Hive 在 Boutlist 中按程序映射使用 nest 坐标列。同步前核对当前行，空白映射字段不读写。保存后重新载入，检查 Start/End/Capture、Captor/Victim、Hive、四项布尔状态、Notes 和事件区间。
+Sync from Boutlist / Sync to Boutlist 使用 Display 中配置的 Boutlist 字段映射；Hive 在 Boutlist 中按程序映射使用 nest 坐标列。同步前核对当前行，空白映射字段不读写。保存后重新载入，检查 Start/End/Capture、Captor/Victim、Hive、四项布尔状态、Notes 和事件区间。
 
 Points 的 Boutlist 同步只处理已映射且实际存在的字段，未提供的列不会清除当前身份、核验或 Camera 状态。数值保存精度差异不作为冲突；已有完整 Scale 标定不会被简单 `scale_px_per_cm` 摘要替换。完整标定的来源选择见 [Scale](09_Scale操作说明.md#98-单值范围和完整输出)，字段和比较规则见 [Boutlist](13_Boutlist制作与使用.md#135-打开与同步规程)。

@@ -43,6 +43,8 @@
 | Current frame/IDs/Selected ID | `ui/data/current_frame.py`, `ids.py`, `selected_id.py` | `ui/tables.py`, `ui/selection.py` |
 | Manual traj/Binding 表 | `ui/data/manual.py`, `binding.py` | `ui/operations/binding.py`, `binding_actions.py` |
 | Box/ID/Swap/Interpolate | `ui/operations/edit.py`, `interpolate.py` | `core/reviewer_core.py` |
+| Filter/运动派生指标 | `ui/operations/filter.py`, `ui/filter_controller.py` | `core/annotation_filter.py`, `workers/filter_query.py` |
+| 操作暂存 | `ui/operations/stash.py` | `core/operation_stash.py`, `ui/timeline.py` |
 | Tracking 页面与控制 | `ui/operations/tracking.py`, `ui/tracking_controller.py` | `tracking/` |
 | Trajectory 页面 | `ui/operations/trajectory.py` | `tracking/trajectory_edit.py`, `trajectory_worker.py` |
 | Detection 页面/参数窗口 | `ui/operations/detection.py`, `ui/detection_controller.py`, `ui/detection_dialogs.py` | `detection/detection_config.py` |
@@ -59,9 +61,29 @@
 
 UI 页面通过普通 mixin 方法使用同一个 MainWindow 状态，不是彼此独立的窗口。移动方法前检查其 `self.*` 依赖和信号连接；不要为了拆分复制一套 Session、选择集合或撤销栈。
 
+主操作区在 `ui/window.py::_build_command_panel` 使用原生 `QTabWidget` 和 `setFixedHeight`。高度唯一读取 `ui/command_panel_height`；默认值集中在 `app/config.py::DEFAULT_COMMAND_PANEL_HEIGHT`。不要恢复按页面 sizeHint 推算主操作区高度或另加 maximum-height 配置。
+
+类别目录由 core/class_catalog.py 读取 INI 的 classes（模型编号到类别名）与 id_groups（按数字排序的类别组合）。具体类别仅在平台配置模板中定义；UI 动态建立 ID 分表及类别选项，未知/跨组身份进入 Other。Detection 和 ROI Worker 接收同一映射；raw 重放使用来源记录的映射及物种角色，不用当前 INI 重释已保存 raw。物种专用后处理的适用范围仍由预设决定。
+
+ID 表 Ctrl+A 只作用于当前分表。超过 512 行的选择由 GUI 定时器分批收集，完成前不提交选择状态；Esc 恢复原选择，不取消 Tracking 或编辑。数据、筛选、排序、表格内容改变时废弃过期任务。ID 成员检查须一次取得已知 ID 集合，不得在每个 ID 的循环中复制全部集合。类别显示按数据修订缓存每个 ID 的单一/混合状态，展开列表只显示配置项，multiple 仅作本体提示。多来源 set_id 使用 track_ids 并在完整回放与增量索引中保持同一范围，避免为每个来源反复重建索引。
+
+Display 的 review/verify_before_save 与 review/ask_<字段名> 属于 Boutlist fields 的 INI 偏好，review_prompt_checks 仅控制是否询问，不能修改项目 info_points 或进入 History。Verify 窗口只提交启用项目的实际 bout 状态，禁用项目保留原值；全部禁用时仅保留 Confirm/Back。保存范围为 Points 的 save_target_only_check，绑定会话级 save_target_only，不写 INI，换文件时复位。Verify review status 窗口的 Confirm 按钮保持默认焦点，Tracking 空格过滤不得消费独立对话框按键。
+
+Tracking 的四个子页为 Track Motion、Templates、Weights、Advanced。空间不够时使用可滚动区域而不扩大主操作区。`tracking/tracking_candidates.py` 为普通及姿态模板共用候选生成和颜色描述，`tracking_engine.py` 区分位置接受与可选的模板更新门槛。候选／颜色设置改变后需使旧请求与权重标定证据失效，不能继续使用旧特征下的标定结果。
+
+Detection 的 Monitor 入口在 Control/Inference 标签栏右侧。`ui/performance_monitor.py` 只负责非激活窗口与显示，`workers/performance_monitor.py` 在独立 QThread 采样 psutil、Windows GetPerformanceInfo 和有超时限制的 nvidia-smi；workers/windows_telemetry.py 用 DXGI 标识适配器，并经 PDH/WDDM 提供 GPU 分配与所属进程指标。硬件名称和数量运行时枚举；同型号多卡不能靠名称猜测映射。System/Reviewer 两列分开，Reviewer 只统计主进程与当前子进程；CPU 选择按系统拓扑和进程亲和性，GPU 支持全体、单卡和实际使用设备。关闭窗口暂停采样，Controller.close 终止线程；不得在 GUI 定时器内同步查询 GPU，不可把不支持的指标显示为零。模型元数据 QProcess 与正式 Detection 分开，按归一化 Path 校验选择、限制读取时长，且仅元数据进程禁用 CUDA。
+
 ## 4. 依赖与线程边界
 
 ### 4.1 依赖方向
+
+Tracking 新会话由 OperationsTrackingMixin.prompt_tracking_setup 先确认身份、类别与初始框参数，Cancel 必须在暂停播放、提交 Continuous、创建 buffer 之前返回。同会话接管/恢复不重复提示；Curve/Camera 保持独立流程。TrackingController 的 template_bank 仅保留当前 Session/视频中的各目标模板，不持久化；Finish/Cancel 不清除模板，显式移除全部模板须同步删除缓存，换视频/Session 清空。时间轴协调须原子映射活动 engine 和缓存 engine，避免切回目标后出现旧帧号。
+
+Tracking 的删除范围窗口仅在实际应用删除时创建 Delete buffer，已有 buffer 删除时保持原 mode。Auto 的人工接管尺寸与光标预览共用 manual_box_size，优先当前模板尺寸。失败恢复使用点击前的引擎快照匹配，两次沿追踪方向相邻、可靠且接近人工点的确认才恢复；Alt 接管等待松键，人工位置不被候选覆盖。Template/Search 按钮运行时可点，进入区域编辑先暂停并结束人工点选。Space 在 Tracking 页按 buffer 是否存在分派为追踪/播放，不能由该页按钮、复选框或下拉框抢占，也不能影响独立对话框。
+
+Tracking ID 可空白，refresh_choices 不预分配；启动对话框接受空白，在确认 Start 后分配未用 ID，Cancel 不修改面板身份。search_offset 表示最新模板取样时 Search 中心减 Template 中心的原图像素偏移，人工修正和恢复不得清零。template_area_box 用于联动参考框的绘制与命中，不替代真实匹配框；Search 拖动复制引擎的可变位置/权重状态，避免修改在途请求，取消恢复原状态，且不生成标注。低分暂停时普通左键可人工指定；引导恢复须保留已切到但未标记的当前帧。
+
+Selected ID 连续段缓存以 Session、navigation_revision、活动 ID、帧界限为键，跳转按钮复用段范围，不得每次重建全部帧集合。逐行 Video/video_path/video_name 不属于标注契约；载入、表格投影及输出均排除，项目级视频关联 metadata 保留。旧 SQLite 工作表的重复列在保存事务内移除并重建行摘要，不能把结构整理记录为逐行人工修改。
 
 UI 调用 core、matching、tracking、media、rendering 和 workers。后台算法不能导入 MainWindow、页面类或 QWidget。后台任务使用 QtCore 信号并不意味着它属于 UI。
 
@@ -103,9 +125,19 @@ ID 与来源 UID 有不同作用：ID 是对象身份，来源 UID 用来追踪�
 
 逐帧追踪不能每次深拷贝整个 Session 或写完整 History 快照。修改回放/撤销时同时测试新建、覆盖、单点删除、范围删除、Redo 和取消。
 
+Filter 先按单条记录执行 Rows 条件，再按命中行汇总 IDs 条件。规则只允许受控运算符与 All/Any 组，不执行用户表达式。后台处理数据快照；查询结果由数据/查询世代校验，测量缓存不随播放帧变化。Continuous 暂存修改和局部撤销同样须失效查询快照，不能只依赖用于身份/帧索引的 navigation_revision 判断坐标是否变化。
+
+Use matched rows 冻结稳定行 UID 与人工点三元身份；普通 ID/Range 不能扩大精确作用域。当前支持 Delete/Class，其他工具要求释放作用域。自动修改使用一个带 target_uids 的增量命令，核心 affected_index 直接查询 UID 索引，再与帧/可选身份限制取交集，完整回放 mask 使用同一交集。混合人工来源时，既有 manual_state_snapshot 连同 Session replay 状态形成一次撤销；_manual_history_owner 防止在 History 中重复显示内部命令，命令仍被归档。不得将筛选结果转换成 ID×Range 笛卡尔积。
+
+Operation Stash 按视频在内存中保存草稿，不持久化、不入编辑 History。端点记录 PictureRef，在索引完成时原子协调；Use/Send 只恢复输入。QDialog 不可使用 window 作为实例属性遮蔽 QWidget.window()，全局输入过滤器依赖此方法。
+
+暂存表以稳定草稿 key 定位，排序后的显示行号不能直接索引后端条目。New 建立当前帧草稿，Connect／Add point 修改选中草稿，并维护 last_frame 及相应画面引用。列宽使用 tables/operation_stash/column_widths，在隐藏窗口时保存。Filter 忽略完全空白的条件及空分组；未取得有效查询结果时显示原表，并禁用精确筛选编辑入口，不能把这些行当作有效命中集合。
+
 ### 5.4 元数据契约
 
 `info_points`、`info_events`、`scale_calibration`、Camera 数据、手工绑定数据和位置来源是文件契约，不是 Python 模块名称。事件使用统一起止帧结构；点事件 start=end。
+
+`set_window` 允许只提供 start_frame 或 end_frame；缺失表示保留原值，显式 None 表示清空。增量执行、完整回放、确认预览和 Boutlist 字段映射必须保持同一含义。点字段清空时，Boutlist 同步必须包含空值，不能因过滤 None 而跳过用户明确的清空。
 
 完整 Scale JSON 写入结果数据库 metadata；Boutlist 可按映射保存简短尺度摘要和完整 JSON，两者独立启用，只更新用户确认的当前行。`core/boutlist_fields.py` 负责规范字段到实际列名的映射；读取和写入必须使用同一映射，空映射停用，重复目标列拒绝。
 
@@ -125,15 +157,19 @@ BoutSelect 显示 `BoutlistEditor` 读取的原始列名、顺序和单元格文
 
 ### 5.8 数据结果保存
 
+`annotation_writer()` 对新文件及经验证无数据的失败空壳先在同目录暂存，提交并 checkpoint 后发布；已有正常库保持增量事务写入。发布不得覆盖保存过程中由其他实例新建的文件。`resolve_raw_source()` 优先使用项目内嵌 raw，再按记录路径及源标注同目录的同名文件查找，并核验来源身份。`OperationsFileMixin.prepare_save_raw_source()` 在 GUI 线程提供指定来源／不带 raw 保存／取消，决定只进入冻结快照，成功后再更新当前会话；Worker 不弹窗。没有 raw 的标注工程合法，明确舍弃状态使用 metadata.raw_storage=omitted，raw 表与引用清理属于同一保存事务，不能在 GUI 预检查时直接删库内数据。缺少列元数据的未提交空库应明确报错，不能生成空 SELECT 或当作有效空标注载入。
+
+新目标发布不得创建或清理结果名的零字节占位：Windows 使用拒绝覆盖的 rename，POSIX 使用同目录排他 hard link，清理仅限本次 .ar-save 临时文件。正常关闭由 `finalize_result()` 尝试 checkpoint/DELETE 日志模式，忙或不可写时跳过；绝不手工 unlink 结果或活跃 WAL/SHM。关闭窗口前若已保存项目缺失，须保留内存数据并进入保存确认，不能因为 dirty 原先为 false 而直接退出。SessionRecoveryStore 删除入口只接受快照文件；目录清理仅限 sessions 的直接会话子目录，且遇到 SQLite 等非恢复文件必须保留，不得递归删除外部手动快照的父目录。
+
 `core/annotation_store.py` 定义带 application_id 与 schema version 的结果库；不要仅凭 `.sqlite` 后缀把结果库当作 raw 缓存。`AnnotationSession.load_csv()` 保留内部入口名称，按格式读取旧 CSV 或 reviewed_detections 到同一 DataFrame。该名称及 session.csv_path 不作为磁盘格式判断依据；恢复 pickle 和编辑算法沿用原契约。
 
 每视频一个结果库，内含 frames/raw_detections、raw_metadata、reviewed_detections、raw_sources、metadata、events、history、history_commands、manual_edits 和 save_transactions。raw_sources 只记录来源，不承担外部依赖。metadata 的 raw_storage=embedded 时，载入器将 raw_cache 解析为当前库路径，不能持久化对自身文件名的依赖。稳定 `_review_uid` 必须持久化，不能在每次载入时重建。首行 compact JSON 在磁盘提升到 metadata，载入时重构同名内存列以复用现有控件与算法；空工作表也必须保存元数据。
 
-ResultStore 使用单写者 WAL/FULL 事务。普通 Save 通过 Session 的 UID 变更记录冻结新增/修改行与删除 UID，`save_delta()` 仅读取和更新这些行，同时提交 metadata/events/history 与增删改审计；成功仅清理该保存版本的变更，保留后台保存期间的新编辑。加载行与 save_revision 来自同一读事务，保存拒绝覆盖其他实例提交的新版本；文档加载世代保护旧保存任务不会改写新文档的路径。所有 schema/行/审计修改同一事务回滚，关闭写连接时 checkpoint；只读连接不得忽略活跃 WAL。
+ResultStore 使用单写者 WAL/FULL 事务。普通 Save 通过 Session 的 UID 变更记录冻结新增/修改行与删除 UID，`save_delta()` 仅读取和更新这些行，同时提交 metadata/events/history 与增删改审计；成功仅清理该保存版本的变更，保留后台保存期间的新编辑。加载行与 save_revision 来自同一读事务，保存拒绝覆盖其他实例提交的新版本；文档加载世代保护旧保存任务不会改写新文档的路径。所有 schema/行/审计修改同一事务回滚，关闭写连接时 checkpoint；标注保存使用 finalize=True，非阻塞地尝试转回 DELETE 日志模式，被并发连接占用则保留 WAL。Detection 默认不切换模式；只读连接不得忽略活跃 WAL，也不得手动删除活跃辅助文件。
 
-首次导入、另存新文件、Undo/Redo 重建、Camera 全表变化和未跟踪的外部物化修改使用完整比较回退。未变化的命令归档不重复复制或编码；变化的 History payload 仍可能较大，不能宣称整个保存过程严格只与脏行数有关。重开后的 history_commands 保持只读。现有内容寻址 pickle 恢复机制保留，恢复后首次保存使用完整比较。
+另存不存在的新文件时，可信基线使用 SQLite backup 克隆，再应用脏行事务；prepare_save 记录 _save_clone_source 与预期版本，ResultStore.copied_source 确认实际复制来源。源版本改变或目标抢先出现时拒绝发布，不能把稀疏快照写到空库或其他库。raw、审计与命令归档随完整数据库复制。首次导入、来源字段升级、片段导出、Undo/Redo 重建、Camera 全表变化和未跟踪的外部物化修改使用完整比较回退。未变化的命令归档不重复复制或编码；变化的 History payload 仍可能较大，不能宣称整个保存过程严格只与脏行数有关。重开后的 history_commands 保持只读。现有内容寻址 pickle 恢复机制保留，恢复后首次保存使用完整比较。
 
-Save/Ctrl+S 写回当前 SQLite；CSV 输入首次保存需要选择 SQLite。Save as/Ctrl+Shift+S 默认名带日期时间，可选择新 SQLite 或 Legacy CSV；Save 默认名不追加时间。CSV 仅作兼容导出，不切换当前工作库、不清除脏状态、不回写 boutlist detection_file。CSV 输出公开字段、首行 compact JSON、metadata.json 与只读 edit_log，不带 raw/命令归档/行审计。区间导出设置只在 Save as 生效，不能覆盖当前完整库或其他已有项目文件。source_annotation_path 保留每行来源，旧库首次保存允许全量升级该字段。人工新增/插值行不继承模板 raw 行引用；绑定对齐改变结果帧时用 raw_frame 保留原始观测帧。不同 raw_source_id 的项目不允许追加，防止外来 raw ordinal 误指当前 raw；没有可验证 raw 身份的旧 CSV 追加保留 legacy_raw_det_index/legacy_raw_frame 诊断，但不建立当前 raw 行关联。额外列名不能仅大小写不同，保存会明确拒绝并保持原库。
+Save/Ctrl+S 写回当前 SQLite；CSV 输入首次保存需要选择 SQLite。Save as/Ctrl+Shift+S 默认名带日期时间，可选择新 SQLite 或 Legacy CSV；Save 默认名不追加时间。CSV 仅作兼容导出，不切换当前工作库、不清除脏状态、不回写 boutlist detection_file。CSV 输出公开字段、首行 compact JSON、metadata.json 与只读 edit_log，不带 raw/命令归档/行审计。范围设置同时作用于 Save 和 Save as：Save 按范围同步当前最终工作表，Save as 输出独立片段并禁止覆盖当前库。片段内帧号保持不变，raw 与历史保留来源覆盖。export_frame_range 记录已保存范围，后续取消范围设置须完整物化，不能沿用裁剪前的增量基线。source_annotation_path 保留每行来源，旧库首次保存允许全量升级该字段。人工新增/插值行不继承模板 raw 行引用；绑定对齐改变结果帧时用 raw_frame 保留原始观测帧。不同 raw_source_id 的项目不允许追加，防止外来 raw ordinal 误指当前 raw；没有可验证 raw 身份的旧 CSV 追加保留 legacy_raw_det_index/legacy_raw_frame 诊断，但不建立当前 raw 行关联。额外列名不能仅大小写不同，保存会明确拒绝并保持原库。
 
 DetectionWorker 与批量入口使用同一个数据库连接写 raw 与 reviewed；raw_metadata 的 state 描述推理缓存，metadata 的 state 描述处理结果。先提交 raw 批次，再提交引用该批次的工作行；允许中断时 raw 比 reviewed 超前，不允许 reviewed 引用未提交 raw。Raw only 使用同样的工程格式，has_reviewed=false 时走只读 raw 预览；正常打开 reviewed 不可切换为 raw 预览。暂停/中断先提交 pending rows 再发布事件，最终清理以一个结果事务替换被修正行。raw_det_index 与 frame 对应 raw 中的 det_index；插值/人工新增不伪造 raw 来源索引。GUI 通过 prepare_save 冻结所需行，AnnotationSaveWorker 在后台线程写出，维持当前 snapshotReady 协议。命令参数含 DataFrame、数组、整数键和元组时使用 JSON 类型编码，禁止将 pickle 作为 SQLite 的载入协议。history_commands 归档参数及撤销状态，不重新注入当前撤销栈。另存新文件通过 SQLite backup 继承 raw 和审计记录后同步工作表；旧独立 raw 导入只复制一次，事务失败不得留下半份 raw。CSV 保留为兼容输入/导出，Boutlist 和外部人工轨迹格式不在结果格式迁移范围。检测启动配置及控制文件位于系统临时目录，结果配置存储于库内 metadata。
 
@@ -176,6 +212,8 @@ Scale 保存 `source` 或 `camera_canvas` 空间及原始约束。缺少必要 C
 
 Mark offset 在模板坐标中定义，随已识别姿态转换为最终标注位置。Assist 必须保持人工/自动指定点在可接受局部框内，受中心与尺寸边界保护。迟到 Assist 结果必须同时通过会话和帧版本检查。
 
+tracking_weights.py 管理 Fixed/Calibrated/Adaptive 的共有有效权重。Match.components/evidence 只记录匹配器原有分项，标准候选最多 12 项、姿态背景证据有固定数量上限；不能额外累计每帧证据。候选生成及五项评分公式保持原样，自动权重不让颜色/边缘生成新的候选。Motion 不从背景差异学习。Calibrated 在模板/显式标定时计算，Adaptive 只从可信接受结果低频更新；Worker 拷贝和既有世代检查隔离迟到结果。UI 保留固定输入与只读有效百分比两套值，不能把自动显示值重新作为输入而造成反馈。
+
 ### 8.2 Trajectory
 
 五个工具为 Edit、Draw、Smooth、Redistribute、Transform。预览算法与画布控件分开；结果必须保留原帧顺序，缺失填充由显式选项决定。重新分配曲线上点的位置会改变速度解释，不能仅作为显示效果处理。
@@ -202,13 +240,25 @@ Raw 缓存是已完成上游筛选的观测，不是原始网络张量。Conf fl
 
 ## 10. Overlay 与性能
 
-`rendering/overlay_data_store.py`、`overlay_scheduler.py`、`trail_overlay_store.py` 管理绘制数据与缓存；Qt raster、保留式 OpenGL 和可选 trail shader 是不同路径。导出有独立组合/编码任务。
+`rendering/overlay_data_store.py`、`overlay_scheduler.py`、`trail_overlay_store.py` 管理绘制数据与缓存；Qt raster、保留式 OpenGL 和可选 trail shader 是不同路径。导出有独立组合/编码任务。GUI 导出始终跟随全局 Overlay renderer；rendering/qt_export_renderer.py 消费同一 FrameOverlayPacket，使用 QPainter 且不创建 OpenGL 上下文；rendering/hud_renderer.py 共享预览与导出的 HUD 外观，rendering/export_annotations.py 处理最终裁切与 HUD。ui/export_crop.py 管理独立画面选区，ui/file_dialogs.py 的 ExportSettingsDialog 为非模态确认窗口。视频范围与裁切只存于 MainWindow.export_selection，不持久化到 INI。
+
+HUD 各类型的默认字号和位置集中在 rendering/hud_renderer.py::HUD_DEFAULTS，hud_layout 按水平／垂直锚点和优先级排布有内容的项目。UI 为每类提供独立颜色、字号、描边和位置，使用 display/hud_<type>_<field> 设置，主开关仍为 display/hud_<type>；不得恢复成全局统一字号。Export settings 的关闭和 Cancel 保留当前视频的范围输入与 File 页预览，仅切换视频时重置。
 
 shader 以图片年龄计算渐变样式；不适用时说明回退，不偷偷改变轨迹。少量 Tracking 交互框仍由 Qt 绘制。避免逐帧扫描全部累积缓冲、重建全量 DataFrame 或无界缓存。
 
 侧栏派生查询使用 `session.navigation_revision` 区分数据代次；它包含工作表身份、保存修改代次和索引重建代次。轨迹帧号、摘要与帧边界的有界缓存不进入 Session 的复制或恢复文件。当前行坐标仍即时读取；自动 Selected ID 表额外检查 Continuous 两个局部撤销栈的变化，切帧只更新焦点。未提升数据代次而原地更新展示列的通路，须像 Compact metadata/Camera 保存同步一样清除表格内容缓存。人工轨迹、Binding 与 Tracking 待提交内容分别遵循各自的更新来源，不能只用 Session 代次判断。轨迹点选缓存还必须区分前后轨迹归属、可见窗口及屏幕变换；画布矩形缓存依赖图片尺寸、控件尺寸、缩放和平移。
 
 验证性能时固定视频、帧区间、模板、显示内容和速度上限。分清初始化、解码、匹配、数据包准备、绘制、编码及写盘耗时。offscreen 测试不能证明真实 GPU/驱动路径可用。
+
+完整 SQLite metadata 由 Session 持有；DataFrame.attrs 仅携带导入核验需要的 raw_source_id。pandas 会在取列、切片和分组时深复制 attrs，不得把整份项目参数或 raw_metadata 放回其中。帧/ID 索引以数值列分组的位置数组建立，保留工作表的实际行标签；载入只建立一次索引。
+
+IDs 的统计内容与选择高亮分别缓存：选择变化只更新原生选区，排序后通过现有 item 的 row() 定位，不重填单元格。数据修订、筛选和离开 Detection 预览时重新核对内容缓存。少量多选的顶部摘要按选择和数据代次复用；超过 24 个 ID 只显示数量汇总。大量多选的帧并集/交集采用一次分组统计，当前对象与箭头只筛当前帧，不逐 ID 查询当前帧。颜色混合状态在发现第一种不同颜色时即可确定。
+
+Selected boxes 计数使用所选 ID 的 track_index 行数总和，并按 navigation_revision 与选择缓存；不能回退成当前帧计数。IDs 的 x/y 范围按当前可见行的源图像中心坐标计算，忽略非有限值，与其余统计使用同一内容缓存。
+
+Hive 的 axis_preview_point 属于画布瞬时状态，不写入 Session 或设置。首次点选前跟随源图像鼠标坐标，固定候选遵循既有 Hive/Camera 坐标空间；Qt 与 GL 静态 Overlay 使用同一预览原点。预览强制可见但不改变 Axis 开关，退出选择时清除。
+
+File 面板在激活时更新。Detection 信息计数来自所选磁盘文件的 reviewed_detections，不混入 raw 或待保存工作表；缓存依赖文件及活动 WAL 的修改时间和大小。未保存编辑不能使磁盘统计失效。Camera 载入筛出每帧第一条运动记录与第一条关键帧记录，避免逐帧构建完整小表。Qt raster 预览不启动未使用的 OpenGL 保留层编译；切回 OpenGL 时再准备相应快照。拖尾编译先按数组分组，Catmull-Rom 采样按固定大小批次计算，维持原采样数、断段与帧顺序。
 
 ## 11. 文案、提示与手册维护
 

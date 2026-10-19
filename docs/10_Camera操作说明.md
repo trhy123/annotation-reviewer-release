@@ -35,7 +35,7 @@ Camera Anchor 追踪把模板识别位置写入选定 Camera 锚点的观测序�
 5. 如果已有 Anchor 位置与模板中心不同，检查自动保留的偏移；必要时使用 Mark offset 修正。
 6. 调整模板区、搜索区、阈值和方向，点击 Run Auto。
 7. 同时检查原始背景特征、锚点位置和稳定画面。
-8. 需要人工修正时点击顶部 `Correct`，再点击正确 Anchor 位置；修正后用 Resume Auto 继续。
+8. 需要人工修正时点击顶部 `Correct`，再点击正确 Anchor 位置；修正后用 Resume 继续。
 9. Finish 提交为一次 Camera History 修改，或 Cancel 恢复本次开始前的 Camera 状态。
 10. 按 Camera 的保存流程保存锚点数据。
 
