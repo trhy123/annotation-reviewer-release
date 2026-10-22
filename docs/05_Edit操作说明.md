@@ -52,7 +52,7 @@ Select 的 Over time 模式的身份与时间限制独立判断：All IDs 未开
 
 ### 5.3.2 Continuous、Auto next 与退出
 
-Continuous 未勾选时，一次成功修改后退出编辑模式。勾选时可连续修改；Auto next 只在 Continuous 有效时用于成功操作后切到下一帧。
+Continuous 未勾选时，一次成功修改后退出编辑模式，勾选时可连续修改。Auto next 只在 Continuous 启用时用于在成功暂存操作后切到下一帧，方向跟随整体播放方向控制。Apply 或 Enter 提交时保持当前帧，不额外执行 Auto next。
 
 在编辑模式中，未设置所需位置时点击 Apply 会退出，不生成空几何修改。ESC 退出交互。编辑中切换 Continuous 的勾选状态也结束当前编辑模式。结束时应核对实际已应用的点；退出交互不应被当作撤销已经完成的操作。
 
@@ -70,7 +70,7 @@ Confirm 为三态控件，控制 Change position、Change class 与 Delete 执�
 
 Change class 的展开列表只包含 INI 配置的类别。控件本体汇总所选身份在工作表中的类别：全部为同一类别时显示该类别，包含两种及以上类别时显示 multiple；该提示不作为可选类别加入列表。统计按身份与数据修订缓存，不随播放或每次展开列表重新扫描操作 Range。实际修改仍遵循所选 ID、Range 及 All frames。
 
-启用相应 Confirm 策略且未勾选 All frames 时，Change class 和 Delete 的确认窗口显示 `Current Range is not All frames.`。Apply 仅执行当前 Range；Apply on all 对当前身份执行全部帧范围，不改写公共 Range 或 All frames 的显示状态；Cancel 不修改数据。关闭 Confirm 时直接按原范围执行，不额外拦截。按 C 可在类别列表中循环切换已选目标的类别，遵循同一范围与确认规则。
+启用相应 Confirm 策略且未勾选 All frames 时，Change class 和 Delete 的确认窗口显示 `Current Range is not All frames.`。Apply 仅执行当前 Range；Apply on all 对当前身份执行全部帧范围，不改写公共 Range 或 All frames 的显示状态；Cancel 不修改数据。关闭 Confirm 时直接按原范围执行，不额外拦截。按 Alt + C 可在类别列表中循环切换已选目标的类别，遵循同一范围与确认规则。
 
 Edit 公共区域的 D 按钮与 Box 的 Delete 完全等效，使用相同 ID、Range、All frames、确认设置和撤销规则。它与 Interpolate 的端点区间 Delete 使用不同的作用范围。
 
@@ -84,7 +84,7 @@ Source 允许多个 ID；Target 必须为单个 ID。执行前逐段检查 Targe
 
 Merge 的主要工作是统一身份。它不会自动判断两个同帧框究竟哪个对应真实目标，也不能用来掩盖两个同时存在的不同个体。出现冲突时先检查相关帧，必要时缩小范围、删除重复框或使用 Swap。
 
-Interpolate between 用于补齐相应身份段之间的空档。插值根据边界几何产生中间框，不会再次读取图像寻找目标。
+Interpolate between 复选框用于补齐相应身份段之间的空档。勾选后，按所列 Target／Source 身份的完整出现段寻找空档并插值补齐。插值不受公共 Range 限制，但 ID 合并本身仍遵循当前 Range 或 All frames。例如 Target 在 100–120 帧、Source 在 140–160 帧，Range 为 140–160 时，合并 Source 的同时仍补齐 121–139 帧。
 
 ### 5.4.2 Change entire 与 Change range
 
@@ -117,6 +117,8 @@ A/B 各包含 frame、id、x、y、w、h。Selected as A/B 将当前选中框的
 3. 选择范围伸出已知首尾时，利用最近几何及显式端点字段构造外侧边界。外推式补点应人工检查。
 4. 区间已经完整、没有可补 gap 时，会询问是否用 A/B 替换该区间；这是重建区间，不是只补缺失。
 5. 没有可用几何或不足两个有效端点时，不能完成插值。
+
+若 A/B 的 frame 未全部填写，且两个 id 框中只提供了一个自动 ID，或两框填写同一自动 ID，点击 Interpolate interval 会补齐该 ID 整条轨迹中有两端有效观测的所有 gap，不使用公共 Range，也不使用已填写的单个 frame 限制范围。原有观测保持不变，不向轨迹首尾外侧延伸；没有 gap 时不改动数据，也不询问是否改写完整轨迹。例如 ID 7 在 100–120 和 130–150 帧出现，只填 id=7 即补齐 121–129 帧。A/B 的两个 frame 均已填写时，继续按下面的区间规则处理。
 
 ### 5.5.3 实例一：短漏检段
 
@@ -179,7 +181,9 @@ Edit 公共区域右下角的 R 按钮打开非模态 Operation stash 小窗口�
 | Store：Endpoints | 将当前 Interpolate A/B 或 Swap Begin/End 存入所选草稿；两端帧号必须有效，其余字段可不完整 |
 | Store：Segment | 存入当前活动身份中包含当前帧的连续段；当前帧不在可用段内时提示重新定位 |
 
-Range、Endpoints、Segment 共用一个来源下拉框与 Store 按钮。Store 替换所选草稿的输入；未选中草稿时新建一条。New 始终另建记录；用户自行修改的 Name 在后续记录点及 Store 时保留。选中行持续作为 Connect／Add point 的编辑目标，不因主窗口拖动进度条或更换公共 ID 而自动切换目标。
+来源下拉框默认 **Focused inputs**，读取主窗口最后获得焦点的 Edit 输入所属整组内容。例如在 Interpolate 的 x 输入框中操作后，Store 同时记录 A/B 的帧号、ID 和位置尺寸；在 Swap 输入框中操作后记录整组 Begin/End。Interpolate、Swap 的单端或未填完整的内容可先作为草稿保存；没有有效帧号时以当前帧作为暂存定位位置，不代替原输入。下拉框也可明确指定 Range、Endpoints、Segment、Trajectory、Merge ID、Change ID、Change position 或 Change class。
+
+**Store** 替换所选草稿；**Append** 将来源的身份和区间加入所选草稿，合并相邻或重叠区间，不填补分离区间之间的空档；未选中草稿时两者均新建记录。追加端点组时保留最前和最后的有效端点，Range 仍保留全部区间。已有专用参数在追加时保留，原来缺少的参数可由新来源补充。New 始终另建记录；自定义 Name 在后续记录点、Store 和 Append 时保留。选中行持续作为 Connect／Add point 的编辑目标，不因主窗口拖动进度条或更换公共 ID 而自动切换目标。关闭当前视频会清除该视频的暂存草稿。
 
 **规程示例：** 在第 100 帧选择 ID 7 后点击 New，定位到 120 帧点击 Connect，得到 100–120。定位到 200 帧点击 Add point，得到 `100-120, 200`；再到 210 帧点击 Connect，得到 `100-120, 200-210`。这些动作只组织操作范围，不生成中间标注点；随后 Use range 或 Send，再执行相应编辑工具。
 
@@ -187,7 +191,7 @@ Range、Endpoints、Segment 共用一个来源下拉框与 Store 按钮。Store 
 
 选中行以黄色显示，Name 默认较窄，Target／Range 提供较宽空间。列宽可拖动调整，关闭窗口时写入 `settings.ini` 的 `tables/operation_stash/column_widths`，再次打开或下次启动恢复。排序后仍以草稿的稳定身份执行编辑和记录点，不使用排序后的显示行号替代原记录。
 
-修改 Target 或 Range 后，原有端点几何和 Merge 专用字段清空，帧端点的画面引用重新建立，防止旧坐标被带入新目标或新帧。后续 Send 到端点工具时，应重新核对并补全位置；不存在的目标可保留为草稿，但不能直接恢复执行。
+修改 Target 或 Range 后，原有端点几何和 Merge 专用字段清空，帧端点的画面引用重新建立，防止旧坐标被带入新目标或新帧。后续 Send 到端点工具时，应重新核对并补全位置；目标已不存在时仍可恢复或 Send 草稿，不弹出阻断窗口；可在目标工具重新指定身份。
 
 × 或列表中的 Delete 键只移除选中的暂存条目，不删除标注。编辑单元格文字时，Delete 保留删除文字的行为。选中条目在进度条预览紫色范围，不自动改写公共 ID／Range 或执行编辑。左侧 ↗ 定位列可直接选中该记录并跳到首帧；Start、End 分别跳到草稿的前后边界，后续可继续拖动主进度条对照检查。
 
@@ -208,7 +212,7 @@ Use range 将草稿恢复到公共 ID、Range 及相应 All 开关，并解除 F
 
 Merge Target／Source 可在目标页继续修改；本功能不推断人工轨迹的自动 ID。Interpolate、Swap、Trajectory 使用单一端点区间，多区间草稿发送时取最外侧两端，宜将不连续的独立编辑区间分别暂存。
 
-恢复与 Send 均不执行删除、插值、交换或曲线应用。仍须在目标工具检查几何及身份，再执行操作。目标已不存在或画面引用不能协调时，重新指定草稿；程序不猜测另一条相近轨迹，也不自动建立新身份。
+恢复与 Send 均不执行删除、插值、交换或曲线应用。仍须在目标工具检查几何及身份，再执行操作。目标已不存在不阻止回填草稿；实际执行时按目标工具的必要条件校验。画面引用不能协调时，重新指定草稿；程序不猜测另一条相近轨迹，也不自动建立新身份。
 
 视频索引完成后，暂存端点按画面身份协调帧号；All frames 草稿按完成后的有效总帧数更新。多条草稿保持各自目标与范围，不自动展开为所有 ID × 所有区间的批量操作。
 

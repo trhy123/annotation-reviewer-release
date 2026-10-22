@@ -65,7 +65,7 @@ Camera 关键帧及开关属于会话元数据。关闭 Enable 可保留锚点�
 | --- | --- |
 | Enable | 应用相机补偿；关闭不清除已有关键帧 |
 | Anchor | 显示背景锚点标记 |
-| HUD / HUD scale | 显示控制辅助信息并调整其显示尺度，不改存储坐标 |
+| HUD / HUD scale | 选择是否开启并调整相机辅助信息字号；与 Display → HUD → Camera 为同一开关 |
 | Threshold | 控制记录相机位移更新的像素门槛 |
 | Number of anchors | 选择参与描述相机运动的锚点槽数量 |
 | Set anchor | 选择当前操作的锚点槽 |

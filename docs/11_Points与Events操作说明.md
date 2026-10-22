@@ -63,7 +63,11 @@ Points 第三行的 `Save only the target segment` 控制 Save 与 Save as 是�
 
 **例：视频开始时胡蜂已持续施压。** Start 使用实际可用分析起点，核验窗口勾选起点左截断；不要虚构一个画面外起点。Capture 仍按真实成功接触帧记录。
 
-## 11.5 Events 的四类事件
+## 11.5 Events 类型
+
+### 11.5.1 默认研究类型
+
+以下为平台设置模板提供的默认类型，实际类型以 settings.ini 和 Types 设置表为准。
 
 | 显示/存储类型 | 标注判据 | 不应据此标注的情况 |
 | --- | --- | --- |
@@ -73,6 +77,18 @@ Points 第三行的 `Save only the target segment` 控制 Save 与 Save as 是�
 | loss_or_blur | 严重运动模糊、遮挡或群体检测坍缩，使空间点集明显不可靠 | 个别轻微漏检 |
 
 bee_slip 记录事件时间，不要求确定蜜蜂长期 ID。事件不自动划分诱导型等最终研究分类；这些结论应由后续分析结合客观轨迹推导。
+
+### 11.5.2 配置类型
+
+1. 在 Edit → Events 点击 Types，打开非模态类型表。
+2. Add 新建定义，Delete 移除选中定义；Up／Down 上移或下移选中定义，调整下拉列表顺序。Internal key 是稳定存储标识，只能以字母开头并包含字母、数字和下划线，不能重复。
+3. Enabled 控制该类型是否可新增及是否显示其 HUD／条带；Name 控制下拉框、事件表和 HUD 中的名称。双击 Color 选择颜色，表格以十六进制颜色代码 `#RRGGBB` 保存，应用于事件表和条带。
+4. Band 为 0 时隐藏该类型条带；1、2、3 分别使用进度条下方的三个条带行。条带隐藏不删除事件，也不禁止 HUD 显示。
+5. 有效修改即时预览名称、颜色和条带。Close 接受修改并供本次运行使用，不写入 INI；Cancel 或窗口 × 放弃本次打开后的修改并恢复原显示。点击 Save settings，或在 Display 的保存范围选择 Event types／All 后保存，才供后续运行使用；保存成功后，Cancel 只放弃此后未保存的修改。
+
+修改名称和颜色不改变已存事件的内部标识或帧区间。停用、删除类型定义不删除已有事件。重新命名 Internal key 不会迁移原标识下的事件，应在事件表明确调整类型。未在本机配置的既有事件仍保留；结果文件中的类型定义可用于显示其名称与颜色。类型配置是程序设置，不属于标注 History；事件区间修改仍进入 History。
+
+**例：** 新建 `camera_obstruction`，Name 为 `Camera obstruction`，颜色选择红色，Band 设为 3。保存 Event types 后，下拉框可以选择该类型并记录区间。将 Band 改为 0 并保存，仅隐藏条带；取消 Enabled 并保存后，该类型的 HUD 和条带均不显示，已有区间仍保存在结果中。
 
 ## 11.6 建立、修改与删除事件
 
@@ -95,15 +111,28 @@ bee_slip 记录事件时间，不要求确定蜜蜂长期 ID。事件不自动�
 
 ## 11.7 Verify 与保存核验
 
-Events 的 Verify 和 Save / Save as 前的核验窗口记录独立的 bout 状态。窗口内项目勾选表示 true，未勾选表示 false；不要求为了允许保存而全部勾选。
+Points 中位于 Victim 下方的 Verify 按钮和 Save / Save as 前的核验窗口记录独立的 bout 状态。窗口内项目勾选表示 true，未勾选表示 false；不要求为了允许保存而全部勾选。
 
 Confirm 提交窗口中已显示项目的结果并继续相应流程；Back 放弃本次核验操作，在保存流程中会取消继续保存。未显示的项目保留当前 bout 中已有的值。
 
 核验窗口不包含保存范围选项。默认焦点位于 Confirm，按空格可提交确认；此时不触发 Tracking 的空格快捷键。
 
-Display → Boutlist fields 提供 Verify review status before saving 总开关。关闭后 Save／Save as 不自动弹出核验窗口，保留原有核验状态；仍可在 Events 点击 Verify 主动打开核验窗口。
+Display → Boutlist fields 提供 Verify review status before saving 总开关。开启后每次 Save／Save as 均弹出一次；关闭文件时如选择保存，也经过同一保存核验流程，不另加一次关闭核验。关闭总开关后 Save／Save as 不自动弹出核验窗口，保留原有核验状态；仍可在 Points 点击 Verify 主动打开核验窗口。
 
-总开关下方的四项复选框决定是否在核验窗口询问相应项目，不表示当前 bout 的实际状态。取消勾选后不显示该项，也不清空其已存状态；全部取消时，核验窗口没有检查项目，仅保留 Confirm/Back。总开关和四项询问开关可由 Save settings 的 Boutlist fields 或 All 范围保存到 INI；实际 bout 状态仍通过核验窗口修改，进入项目 History 和结果 SQLite。右侧列名映射只控制 Boutlist 读写，须 Save settings 后生效。
+总开关下方为可增删的核查定义表。表中开关是设置，不是当前 bout 的核查结果。
+
+| 列 | 行为 |
+| --- | --- |
+| Internal field | 核查状态的稳定内部字段；字母开头，可含数字和下划线，不得重复或占用既有 Points 字段 |
+| Enabled | 是否启用该项；停用后不询问、不同步，保留结果中已有状态 |
+| Question | 核验窗口显示的英文问题文本 |
+| Boutlist field | Boutlist 中对应的列名；空白不参与 Boutlist 读写 |
+| Sync | 是否允许从 Boutlist 读取或向其同步；要求启用、列名非空且实际存在该列 |
+
+使用 Add／Delete 增删定义，编辑单元格修改内容。通过 Save settings 的 Boutlist fields 或 All 范围保存并激活草稿。保存其他分组不应用本组修改。每项 Enabled 即表示在 Verify 中询问，不再设置单独的 Ask。所有项目均未启用时，Verify 为空，仅保留 Confirm／Back。核验窗口内确认的实际状态进入项目 History 和结果 SQLite；设置表修改不进入项目 History。删除或停用定义不清空已有状态，变更内部字段不自动迁移旧字段。
+
+**例：** 新增 `identity_checked`，启用并填写问题，Sync 关闭。该问题会出现在 Verify，回答保存到结果 SQLite，但不询问 Boutlist 同步。之后在 Boutlist 增加 `identity_checked` 列，在配置表指定该列并开启 Sync，保存配置后方可同步。未指定 Boutlist field 时，Sync 灰显且自动取消勾选。未配置或缺失对应列时，不通过 Points JSON 间接改写该项。
+
 
 ### 11.7.1 核验建议
 
@@ -114,6 +143,6 @@ Display → Boutlist fields 提供 Verify review status before saving 总开关�
 
 ## 11.8 同步和验收
 
-Sync from Boutlist / Sync to Boutlist 使用 Display 中配置的 Boutlist 字段映射；Hive 在 Boutlist 中按程序映射使用 nest 坐标列。同步前核对当前行，空白映射字段不读写。保存后重新载入，检查 Start/End/Capture、Captor/Victim、Hive、四项布尔状态、Notes 和事件区间。
+Sync from Boutlist / Sync to Boutlist 使用 Display 中配置的 Boutlist 字段映射；Hive 在 Boutlist 中按程序映射使用 nest 坐标列。同步前核对当前行，空白映射字段不读写。保存后重新载入，检查 Start/End/Capture、Captor/Victim、Hive、启用的核查状态、Notes 和事件区间。
 
 Points 的 Boutlist 同步只处理已映射且实际存在的字段，未提供的列不会清除当前身份、核验或 Camera 状态。数值保存精度差异不作为冲突；已有完整 Scale 标定不会被简单 `scale_px_per_cm` 摘要替换。完整标定的来源选择见 [Scale](09_Scale操作说明.md#98-单值范围和完整输出)，字段和比较规则见 [Boutlist](13_Boutlist制作与使用.md#135-打开与同步规程)。

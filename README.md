@@ -31,24 +31,39 @@
 
 ## 程序结构
 
+Windows/Linux 保持同级绿色版目录：
+
 ```text
 AnnotationReviewer-<platform>/
-├─ AnnotationReviewer.exe / AnnotationReviewer.app
-├─ _internal/                 # Windows/Linux GUI 运行库
-├─ DetectionWorker/           # 独立的 YOLO 推理程序及运行库
-├─ runtime/                   # 只存放共享媒体运行时
-│  ├─ bin/                    # ffmpeg、ffprobe；Windows 的 libmpv/DLL 也在这里
-│  ├─ lib/                    # macOS/Linux 的 libmpv 与共享库
-│  └─ licenses/
-├─ cache/                     # 可删除的应用缓存与恢复数据
-│  ├─ recovery/
-│  └─ overlay_layers/
-├─ settings.ini
-├─ presets_detection/         # GUI 与 DetectionWorker 共用的检测预设
+├─ AnnotationReviewer.exe / AnnotationReviewer  # 主程序
+├─ _internal/                                   # 主程序运行库
+├─ DetectionWorker/                             # YOLO 程序及其运行库
+├─ runtime/{bin,lib,licenses}/                  # FFmpeg、FFprobe、libmpv
+├─ settings.ini                                 # 配置文件
+├─ presets_detection/
 ├─ models/
-├─ detection_results/
-└─ BUILD_INFO.json
+├─ cache/
+└─ detection_results/
 ```
+
+macOS 绿色版把全部程序依赖封装在 `.app` 内：
+
+```text
+AnnotationReviewer-macos-<arch>/
+├─ AnnotationReviewer.app/Contents/
+│  ├─ MacOS/AnnotationReviewer
+│  ├─ Helpers/{DetectionWorker.app,media-runtime/bin/}
+│  ├─ Frameworks/                               # Python、Qt、media-runtime/lib 等
+│  └─ Resources/                                # 默认配置、预设、许可证
+├─ settings.ini                                 # 配置文件
+├─ presets_detection/                           # 可编辑检测预设
+├─ models/
+├─ cache/
+├─ detection_results/
+└─ cleanup_macos.command
+```
+
+**移动整个 macOS 绿色版目录**时，优先使用 `.app` 同级 `settings.ini`；模型、可编辑预设、缓存和结果的相对路径以该目录为基准。**只移动 `.app`**、且新位置没有同级配置时，使用 `~/Library/Application Support/AnnotationReviewer/` 保存配置与用户数据，系统默认缓存位于 `~/Library/Caches/AnnotationReviewer/`。已有配置中显式指定的缓存路径优先。程序不向已签名 `.app` 写入用户数据，也不要求外置 runtime 或 Worker。详见 [macOS 打包与诊断](docs/macos-packaging.md)。
 
 GUI 不包含 PyTorch、Ultralytics 或 scikit-image；模型推理由 `DetectionWorker` 承载。GUI 使用 SciPy 支持轨迹插值、平滑等功能。因此检测进程的启动、退出或显存错误不会直接破坏 GUI 进程。
 
@@ -77,7 +92,7 @@ Windows、macOS 和 Linux 的 GUI 与 DetectionWorker 均使用 `opencv-python-h
 
 ## 共享媒体运行时
 
-构建脚本会从 [`trhy123/annotation-reviewer-media-runtime`](https://github.com/trhy123/annotation-reviewer-media-runtime) 的 Release 下载已经编译好的平台运行时，并整体放入 `runtime/`。
+构建脚本会从 [`trhy123/annotation-reviewer-media-runtime`](https://github.com/trhy123/annotation-reviewer-media-runtime) 的 Release 下载已经编译好的平台运行时，并放入 Windows/Linux 的 `runtime/`，或 macOS `.app/Contents/` 内对应的 Helpers、Frameworks 和 Resources 目录。
 
 运行时包含：
 
@@ -127,7 +142,9 @@ settings.macos.ini
 settings.linux.ini
 ```
 
-构建时只复制当前平台模板，并改名为发布目录中的 `settings.ini`，随后自动写入当前 runtime 的实际相对路径。直接运行源码时，若不存在 `settings.ini`，程序会按当前系统从相应模板生成。
+各平台构建均提供可编辑的同级 `settings.ini`。macOS 还在 `Contents/Resources/settings.macos.ini` 保留只读模板，供单独移动 `.app` 后初始化用户配置。直接运行源码时，缺少配置文件会复制当前平台模板；模板未提供的参数采用同一套代码默认值，不按操作系统区分。
+
+代码备用值统一为：解码线程 4、Detection FFmpeg 线程 4、预测 Worker 2、YOLO batch 8、播放队列 48 帧／缓冲 64 帧、两项 Overlay 缓存各 128 MiB。平台模板和用户已保存的数值优先，不自动覆盖现有配置。
 
 `settings.ini` 保存外部程序路径、模型路径、解码与渲染模式、窗口布局、表格列宽、标注样式及其他用户设置。恢复文件和 Overlay 缓存写入 `cache/`；`runtime/` 只用于媒体依赖。删除 `settings.ini` 会重置配置。
 
@@ -193,9 +210,11 @@ Actions 的 `Optional release tag; blank uses build-<run number>` 同时决定 R
 
 - Windows：64 位 Windows 10 1809 或更新版本、Windows 11
 - macOS：macOS 13 Ventura 或更新版本；分别提供 Apple Silicon 和 Intel 构建
-- Linux：x86-64，建议 Ubuntu 22.04 或具有相近/更新 glibc 的发行版
+- Linux：x86-64，以 Ubuntu 22.04（glibc 2.35）为构建基线；不保证兼容更旧 glibc 或所有发行版。桌面需具备 Qt 对应的 X11/xcb 或 Wayland 依赖，以及可用的 OpenGL 驱动。
 
 不维护 32 位、Windows 7、Windows 8.1 版本或单独的 macOS 12 兼容构建。
+
+公共构建测试工作流内包含 Windows、macOS、Ubuntu 22.04／24.04 的路径和配置测试；取消所有平台构建勾选即可只运行源码检查。构建后的验收会从其他工作目录验证 GUI 导入、Worker JSON 协议及媒体依赖加载；Linux 媒体运行时还会在不设置 `LD_LIBRARY_PATH` 的条件下校验依赖。以上检查不能替代真实桌面上的播放、精确定位、检测、导出与保存验收。
 
 ## 使用说明
 
