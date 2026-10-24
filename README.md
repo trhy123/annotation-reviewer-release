@@ -37,13 +37,12 @@ Windows/Linux 保持同级绿色版目录：
 AnnotationReviewer-<platform>/
 ├─ AnnotationReviewer.exe / AnnotationReviewer  # 主程序
 ├─ _internal/                                   # 主程序运行库
-├─ DetectionWorker/                             # YOLO 程序及其运行库
+├─ DetectionWorker/                             # 检测程序及其运行库
 ├─ runtime/{bin,lib,licenses}/                  # FFmpeg、FFprobe、libmpv
 ├─ settings.ini                                 # 配置文件
-├─ presets_detection/
-├─ models/
-├─ cache/
-└─ detection_results/
+├─ presets_detection/                           # 检测后处理预设
+├─ cache/{overlay_layers,pts,recovery}/         # 缓存与恢复
+└─ models/                                      # 模型权重文件目录
 ```
 
 macOS 绿色版把全部程序依赖封装在 `.app` 内：
@@ -56,11 +55,10 @@ AnnotationReviewer-macos-<arch>/
 │  ├─ Frameworks/                               # Python、Qt、media-runtime/lib 等
 │  └─ Resources/                                # 默认配置、预设、许可证
 ├─ settings.ini                                 # 配置文件
-├─ presets_detection/                           # 可编辑检测预设
-├─ models/
-├─ cache/
-├─ detection_results/
-└─ cleanup_macos.command
+├─ presets_detection/                           # 检测后处理预设
+├─ cache/{overlay_layers,pts,recovery}/         # 缓存与恢复
+├─ models/                                      # 模型权重文件目录
+└─ cleanup_macos.command                        # MacOS 公共目录配置清理脚本
 ```
 
 **移动整个 macOS 绿色版目录**时，优先使用 `.app` 同级 `settings.ini`；模型、可编辑预设、缓存和结果的相对路径以该目录为基准。**只移动 `.app`**、且新位置没有同级配置时，使用 `~/Library/Application Support/AnnotationReviewer/` 保存配置与用户数据，系统默认缓存位于 `~/Library/Caches/AnnotationReviewer/`。已有配置中显式指定的缓存路径优先。程序不向已签名 `.app` 写入用户数据，也不要求外置 runtime 或 Worker。详见 [macOS 打包与诊断](docs/macos-packaging.md)。

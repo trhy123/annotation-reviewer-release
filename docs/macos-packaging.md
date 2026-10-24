@@ -45,8 +45,6 @@ ad-hoc 测试包未获 Developer ID 信任时，Gatekeeper 拒绝属于签名状
 
 主仓库只保留公共构建和 Release 同步工作流。公共构建中的源码测试与完整构建均由手动操作触发，不随 push 自动运行。测试 PR 中某个版本时，选择其分支和所需平台，保持 `publish_mode=none`。
 
-发布目标选择 `source` 后，构建账号会触发自身仓库中的公共试用通道同步任务，不依赖源码账号的 Actions 额度。跨仓库构建需配置 `SOURCE_RELEASE_TOKEN`；公共仓库优先使用 `PUBLIC_RELEASE_TOKEN`，也可复用具有该公共仓库写权限的 `SOURCE_RELEASE_TOKEN`。同步始终从 `trhy123/annotation-reviewer` 读取对应版本，只复制文档、图标和校验通过的 Release 附件。
-
 ## 签名与公证
 
 默认 ad-hoc 签名仅用于测试，不等同于 Apple 信任的 Developer ID 签名。正式分发需 Apple Developer Program 的有效证书和私钥。构建前设置：
