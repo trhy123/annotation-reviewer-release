@@ -82,7 +82,7 @@ bee_slip records event timing without requiring a persistent honeybee ID. Events
 
 1. Click Types in Edit → Events to open the nonmodal type table.
 2. Use Add to create a definition and Delete to remove selected definitions; Up/Down moves selected definitions to change dropdown order. Internal key is a stable storage identifier: it must begin with a letter, contain only letters, digits, and underscores, and be unique.
-3. Enabled controls whether new events of this type can be added and whether its HUD/strip is displayed; Name controls its label in the dropdown, event table, and HUD. Double-click Color to choose a color; the table stores a hexadecimal `#RRGGBB` code applied to the event table and strip.
+3. Enabled controls whether new events of this type can be added and whether its HUD/strip is displayed; Name controls its label in the dropdown, event table, and HUD. Tip is an editable, INI-backed description shown on type choices and event cells, exactly as entered. Double-click Color to choose a color; the table stores a hexadecimal `#RRGGBB` code applied to the event table and strip.
 4. Band 0 hides this type's strip; 1, 2, and 3 use the three strip rows below the progress bar respectively. Hiding a strip does not delete events or disable HUD display.
 5. Valid changes immediately preview names, colors, and strips. Close accepts changes for the current run without writing to INI; Cancel or the window × discards changes since opening and restores the previous display. To retain changes for later runs, click Save settings, or save with Event types/All selected in Display's save scope; after a successful save, Cancel discards only subsequent unsaved changes.
 
@@ -128,8 +128,11 @@ The definition table below that switch contains settings, not the current bout's
 | Sync | Register this confirmed review after a successful annotation save; requires Enabled and an existing nonempty mapping |
 | Input type | `dropdown`: choices plus an unreviewed blank; `text`: free input; `checkbox`: two states without a blank |
 | Choices (a\|b\|c) | **Dropdown only.** Separate stored values with `\|`, such as `1\|0` or `pass\|fail`. Values are stored literally; this is neither JSON nor a value:label syntax. Not reviewed is added automatically; do not add an empty choice |
+| Tip | The full review criteria, shown on hover and stored/displayed exactly as entered |
+| Choice labels | Optional `\|`-separated labels aligned with Choices, such as stored `1\|0` and displayed `Pass\|Needs attention`. Blank shows the values. Counts must match and labels must be nonempty |
+| Blank label | Text for the empty value, such as Not reviewed. Blank uses the standard interface translation |
 
-Choices must be nonempty, distinct, and free of empty segments; `1||0` is invalid. Saving an invalid draft reports an error and preserves the existing configuration. Switching to text or checkbox clears and disables Choices; options manually supplied for those types in INI are ignored. Drag a header boundary to resize Question. The input-type combo displays its text once.
+Adding a review field or switching to dropdown fills empty Choices with `1|0`; edit them for other stored values. Choices must be nonempty, distinct, and free of empty segments; `1||0` is invalid. Saving an invalid draft reports an error and preserves the existing configuration. Switching to text or checkbox clears and disables Choices, Choice labels, and Blank label. Drag a header boundary to resize Question. The input-type combo displays its text once.
 
 Deleting/disabling definitions does not clear existing result values. Renaming an internal field does not migrate old values. Unmapped or absent columns cannot be updated indirectly through Points JSON.
 
@@ -139,8 +142,8 @@ All three platform templates now provide these four fields, with concise Chinese
 
 | Field | Input | Meaning |
 | --- | --- | --- |
-| `response_qc_pass` | Dropdown: `1` pass, `0` needs attention, blank unreviewed | For stimulus trials, inspect the first 2 seconds, including zero-count trials. Check for missed/double counts and ensure each counted downward response belongs to one bee. For baseline trials, inspect the actual included baseline window and distinguish real downward movement from ID-switch artifacts |
-| `spatial_qc_pass` | Dropdown: `1`, `0`, or blank | For stimulus trials, inspect the first 6 seconds, stopping at earlier contact or video end. For baseline trials, inspect the actual baseline window. Box counts and positions must support group depth, dispersion, and neighbor analysis. ID swaps alone do not prevent passing when positions are correct |
+| `response_qc_pass` | Dropdown: `1` pass, `0` needs attention, blank unreviewed | For stimulus trials, inspect the first 2 seconds after the stimulus segment begins, including trials for which the program counted zero (check them for missed responses). Check for missed/double counts and ensure each counted downward response belongs to one bee. For baseline trials, inspect the actual included baseline window and distinguish real downward movement from ID-switch artifacts |
+| `spatial_qc_pass` | Dropdown: `1`, `0`, or blank | For stimulus trials, inspect the first 6 seconds, stopping at earlier contact or video end. For baseline trials, inspect the actual baseline window. Box counts and positions must support group depth, dispersion, and neighbor analysis. ID-label swaps alone do not prevent this spatial check from passing when box counts and positions are correct; this does not imply the response-identity check has passed |
 | `reviewer` | Text, such as `WTY` | The actual reviewer's name or stable initials; the latest entry is remembered and must be changed when the reviewer changes |
 | `review_date` | Text: `YYYY-MM-DD` | Defaults to today and can be edited to the actual review date |
 

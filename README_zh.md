@@ -223,4 +223,6 @@ Actions 的 `Optional release tag; blank uses build-<run number>` 同时决定 R
 
 操作手册参见 [中文版](docs/zh/00_操作手册.md) / [English version](docs/en/00_Annotation_Reviewer_User_Manual.md)，各功能说明独立成文件。
 
-界面语言默认英文，在 Display → Others → Language 可选择简体中文，保存设置并重启生效。Classes 表格可直接维护模型编号与类别映射。
+界面语言默认英文，在 Display → Others → Language 可选择简体中文，保存设置并重启生效。Classes 表格可直接维护模型编号、类别和说明。Events／核验说明、下拉选项显示文字均在软件中编辑并保存到 `settings.ini`。
+
+合并手册可运行 `python docs/build_manual.py` 交互选择目录和输出文件，也可指定 `--docs docs/zh --output "AnnotationReviewer用户文档.md"`（英文使用 `docs/en`）。项目资源链接保持指向原文件。
