@@ -36,6 +36,8 @@ def prose_lines(text):
 
 def merge_manual(docs, output):
     docs, output = Path(docs).resolve(), Path(output).resolve()
+    if not docs.is_dir():
+        raise ValueError(f'Document folder not found: {docs}')
     files = sorted(path for path in docs.iterdir() if CHAPTER.match(path.name))
     if not files:
         raise ValueError('No numbered Markdown chapters found.')
@@ -109,7 +111,7 @@ def merge_manual(docs, output):
             relative = dest.relative_to(docs)
         except ValueError:
             try:
-                relative = Path('_project')/dest.relative_to(docs.parent)
+                relative = Path('_project')/dest.relative_to(ROOT if docs.is_relative_to(ROOT) else docs.parent)
             except ValueError:
                 raise ValueError(f'{source.name}: asset outside project: {url}') from None
         asset = output.parent/(output.stem+'_assets')/relative
@@ -124,10 +126,12 @@ def merge_manual(docs, output):
         for line, prose in prose_lines(texts[path]):
             if prose:
                 # Inline code is literal too; do not rewrite apparent links within it.
-                pieces = re.split(r'(`+[^`]*`+)', line)
-                for i in range(0, len(pieces), 2):
-                    pieces[i] = LINK.sub(lambda m: m[1]+target_url(m[2], path)+m[3], pieces[i])
-                line = ''.join(pieces)
+                code_spans = [m.span() for m in re.finditer(r'(`+)[^`]*?\1', line)]
+                def rewrite_link(match):
+                    if any(start <= match.start() < end for start, end in code_spans):
+                        return match[0]
+                    return match[1]+target_url(match[2], path)+match[3]
+                line = LINK.sub(rewrite_link, line)
                 match = REFERENCE.match(line.rstrip('\n'))
                 if match:
                     line = match[1]+target_url(match[2], path)+match[3]+'\n'
@@ -145,11 +149,15 @@ def merge_manual(docs, output):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--docs', type=Path, default=ROOT/'docs')
-    parser.add_argument('--output', type=Path, default=ROOT/'docs/AnnotationReviewer操作手册.md')
+    parser.add_argument('--docs', type=Path, required=True, help='Folder containing numbered Markdown chapters.')
+    parser.add_argument('--output', type=Path, help='Destination Markdown file; defaults to AnnotationReviewer_User_Manual.md in --docs.')
     args = parser.parse_args()
-    count, assets = merge_manual(args.docs, args.output)
-    print(f'Merged {count} chapters and {assets} assets: {args.output.resolve()}')
+    output = args.output or args.docs/'AnnotationReviewer_User_Manual.md'
+    try:
+        count, assets = merge_manual(args.docs, output)
+    except (ValueError, OSError) as exc:
+        parser.exit(1, f'Error: {exc}\n')
+    print(f'Merged {count} chapters and {assets} assets: {output.resolve()}')
 
 
 if __name__ == '__main__':

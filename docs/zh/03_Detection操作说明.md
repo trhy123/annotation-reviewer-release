@@ -73,7 +73,7 @@ Raw 是 YOLO/tracker 已输出的检测，保存在自定义后处理之前；�
 
 缓存已挂载时，再次点击 **Choose raw** 退出 Raw／后处理缓存预览，返回正式审阅层，不删除缓存；需要更换缓存时退出后再点一次选择。参数修改本身不触发回放，使用 Postprocess settings 的 Center here／Update／Full replay 手动计算。
 
-参数设置于检验功能位于独立窗口 **Postprocess settings**。Before／After 只准备范围，点击 Center here 才应用并计算；打开窗口本身不重新计算。已完成区间与其余 Raw 共存，关闭窗口不卸载绿色范围条带。Raw 和结果均可显式编辑，结果修改默认不写回 Raw；Apply to Raw、Reprocess range 和 Save preview 的详细流程见[后处理测试说明](04_Detection后处理测试操作说明.md)。
+参数设置与检验功能位于独立窗口 **Postprocess settings**。Before／After 只准备范围，点击 Center here 才应用并计算；打开窗口本身不重新计算。已完成区间与其余 Raw 共存，关闭窗口不卸载绿色范围条带。Raw 和结果均可显式编辑，结果修改默认不写回 Raw；Apply to Raw、Reprocess range 和 Save preview 的详细流程见[后处理测试说明](04_Detection后处理测试操作说明.md)。
 
 Follow progress 用于跟随识别帧。识别中的框是临时结果；结果库运行时批量保存临时后处理行；结束时事务写回全片清理后的数据，以 metadata 中的 state 判断是否完整。速率 `0.45x` 表示每秒约处理 0.45 秒视频，暂停时间不计入活跃处理时长。
 
@@ -91,7 +91,7 @@ Inference 中的 **Conf floor** 是保留候选框的低阈值；**Conf main** �
 
 ## 3.6 类别、模型映射与 IDs 分组
 
-类别配置在程序启动时读取。修改 settings.ini 后重新启动程序，已保存项目中的类别不因配置变化而自动改写。
+类别配置在程序启动时读取，也可在 Display → Others → Classes 中 Edit、Add / Remove 后 Apply，立即保存并更新类别控件。直接修改 settings.ini 后重新启动程序。已保存项目中的类别不会因配置变化自动改写。打开 CSV／SQLite 时会比较文件类别，并询问是否补充当前缺少的类别。详见 [类别与界面语言](14_设置与性能说明.md#1451-类别与界面语言)。
 
 ```ini
 [classes]
@@ -168,3 +168,32 @@ Start 启动当前设置对应的任务；Pause 暂停活动任务，保留其�
 ## 3.13 验收项目
 
 检查视频与缓存身份、实际设备、上游参数快照、缓存是否完整、输出位置和 raw/stable ID 区别。对密集目标、遮挡、快速位移及类别冲突分别抽查。模型检测置信度不是身份正确率；更长稳定 ID 或更平滑轨迹也不能直接证明后处理更准确。
+
+## 3.14 命令行检测
+
+主程序提供 `detect` 子命令，调用现有 DetectionWorker，不打开 Reviewer 界面。各平台参数一致，`Reviewer` 的入口替换方式见 [启动命令](01_基础操作说明.md#131-直接打开视频与标注)。命令行用法可运行 `Reviewer detect --help` 查看。
+
+```text
+Reviewer detect --video "videos/example.mp4" --model "models/model.pt" --output-dir "results" --report "batch.json"
+Reviewer detect --video "a.mp4" --video "b.mp4" --report "batch.json"
+Reviewer detect --input-list "videos.txt" --device cpu --mode raw-only --report "batch.json"
+```
+
+`--video` 可重复；也可与 `--input-list` 合用，重复路径只执行一次。列表为 UTF-8 文本，一行一个视频路径，不加引号；列表内相对路径按列表目录解释，命令中相对路径按调用目录解释。
+
+```text
+videos/a.mp4
+videos/b.mp4
+```
+
+| 参数 | 省略时的行为 |
+| --- | --- |
+| `--model` | 使用 settings.ini 的 detection/model_path，或程序默认模型路径；文件不存在则报错，不启动检测 |
+| `--output-dir` | 使用检测输出目录配置；每个视频建立独立运行目录，不覆盖已有结果 |
+| `--preset` | 使用检测预设与已保存后处理设置；显式指定时加载该预设 |
+| `--device` | 使用已保存设备，未设置为 auto |
+| `--mode` | 默认 raw-postprocess；可选 raw-only |
+| `--preview-end` | 最后处理帧，0 为整个视频，默认 0 |
+| `--report` | 指定批量结果 JSON；推荐编译版及自动化调用始终指定 |
+
+YOLO 阈值、输入尺寸、batch、管线、解码及类别映射复用程序配置。先校验全部输入视频、模型、预设和 Worker，再开始第一项；缺少必要输入或有效默认值时报错，不执行检测。多个视频依次运行；某项 Worker 失败会记录错误并继续其余项。进程退出码 0 表示全部成功，1 表示校验或任务失败；report 包含 `ok`、各项视频/输出目录/退出码及错误，校验失败也会写入。此命令只进行检测，不自动打开审阅文件，不改变界面当前输入。编译版未附控制台时，请从 report 查看结果。
