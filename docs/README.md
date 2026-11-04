@@ -16,6 +16,6 @@ Merge the English chapters from the project root:
 python docs/build_manual.py --docs docs/en --output "AnnotationReviewer_User_Manual.md"
 ```
 
-`--docs` 必须指定源文件夹，找不到目录或编号分册时会报错并跳过，不写入输出。`--output` 可省略，默认在指定目录生成 `AnnotationReviewer_User_Manual.md`。
+未指定 `--docs` 时会交互询问分册目录；未指定 `--output` 时会询问输出路径，回车采用提示的默认文件名。找不到目录或编号分册时报错，不写入输出。分册目录内的图片等资源按需复制；目录外的项目文件直接链接到原文件，例如项目根目录的 `translations/zh_CN.json`，不另建 `_assets/_project` 副本。
 
-`--docs` is required. A missing folder or an empty chapter set reports an error without writing output. If `--output` is omitted, the result is `AnnotationReviewer_User_Manual.md` in the selected folder.
+Omitting `--docs` prompts for the chapter folder. Omitting `--output` prompts for the output path; Enter accepts the suggested filename. Missing folders or chapters report an error without writing output. Chapter-local assets may be copied; external project resources link to their original files, such as `translations/zh_CN.json` in the project root, without an `_assets/_project` copy.

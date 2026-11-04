@@ -111,35 +111,40 @@ Each event occupies one table column; events containing the current frame are hi
 
 ## 11.7 Verify and Save Verification
 
-The Verify button below Victim in Points and the verification dialog before Save / Save as record independent bout states. Checked items mean true; unchecked items mean false. All items need not be checked to allow saving.
+The Verify button below Victim in Points and the dialog before Save / Save as record the current bout's manual review. **Not reviewed** stores an empty value; `1` means pass and `0` means needs attention. Both numeric values mean the item was checked. Text fields accept free input. A checkbox has only checked/unchecked states and cannot represent an unreviewed blank; use a dropdown when that distinction matters.
 
-Confirm commits results for displayed items and continues the corresponding workflow; Back discards this verification operation and, during saving, cancels continuation of the save. Items not displayed retain their existing values in the current bout.
+**Confirm review** commits the displayed answers to the annotation. After that annotation is saved successfully, the confirmed enabled fields with Sync and an existing mapped column are registered in the current Boutlist row. **Skip review** continues saving without registering a new review; **Back** cancels saving. Hidden fields retain their values. The dialog does not set the save range. Confirm review is the default button and accepts Space.
 
-The verification dialog contains no save range option. Confirm has default focus, and Space submits confirmation without triggering the Tracking Space shortcut.
+The master **Verify review status before saving** switch in Display → Boutlist fields opens the dialog once per Save / Save as, including saving while closing a file. Turning it off preserves existing review data. Verify in Points remains available manually.
 
-Display → Boutlist fields provides the master Verify review status before saving toggle. When enabled, the dialog appears once for each Save/Save as; choosing to save while closing a file follows the same verification process without an additional closing check. Disabling the master toggle prevents automatic dialogs for Save/Save as and retains existing verification states; Verify in Points can still open the dialog manually.
+The definition table below that switch contains settings, not the current bout's answers. Save the Boutlist fields or All settings scope to activate edits. User questions and choices are displayed as entered, independently of the interface language.
 
-Below the master toggle is a review definition table supporting additions and deletions. Its toggles are settings, not review results for the current bout.
-
-| Column | Behavior |
+| Column | Entry and behavior |
 | --- | --- |
-| Internal field | Stable internal review status field; begins with a letter, may contain digits and underscores, and must neither duplicate another field nor use an existing Points field |
-| Enabled | Enables this item; disabling it stops questions and synchronization while retaining existing result status |
-| Question | English question text displayed in the verification dialog |
-| Boutlist field | Corresponding Boutlist column name; blank fields do not participate in Boutlist reading or writing |
-| Sync | Allows reading from or synchronizing to Boutlist; requires the item to be enabled, a nonempty column name, and an existing column |
+| Internal field | A stable identifier starting with a letter, containing letters, digits, or underscores; unique and distinct from built-in Points fields |
+| Enabled | Include the field in the dialog; disabling it preserves its stored value and stops synchronization |
+| Question | The question shown to the reviewer, exactly as entered |
+| Boutlist field | An existing Boutlist column; leaving it blank disables Sync |
+| Sync | Register this confirmed review after a successful annotation save; requires Enabled and an existing nonempty mapping |
+| Input type | `dropdown`: choices plus an unreviewed blank; `text`: free input; `checkbox`: two states without a blank |
+| Choices (a\|b\|c) | **Dropdown only.** Separate stored values with `\|`, such as `1\|0` or `pass\|fail`. Values are stored literally; this is neither JSON nor a value:label syntax. Not reviewed is added automatically; do not add an empty choice |
 
-Use Add/Delete to add or remove definitions and edit cells to change content. Save and activate drafts through the Boutlist fields or All scope of Save settings. Saving other groups does not apply changes to this group. Enabled means the item is asked in Verify; there is no separate Ask setting. If no items are enabled, Verify is empty except for Confirm/Back. Actual states confirmed in the dialog enter project History and the result SQLite; settings table changes do not enter project History. Deleting or disabling definitions does not clear existing states, and changing an internal field does not migrate the old field automatically.
+Choices must be nonempty, distinct, and free of empty segments; `1||0` is invalid. Saving an invalid draft reports an error and preserves the existing configuration. Switching to text or checkbox clears and disables Choices; options manually supplied for those types in INI are ignored. Drag a header boundary to resize Question. The input-type combo displays its text once.
 
-**Example:** Add `identity_checked`, enable it, enter a question, and leave Sync off. The question appears in Verify and its answer is saved to the result SQLite, without a Boutlist synchronization prompt. Later, add an `identity_checked` Boutlist column, specify it in the configuration table, enable Sync, and save settings to permit synchronization. Without a Boutlist field, Sync is disabled and automatically unchecked. If the corresponding column is unconfigured or missing, Points JSON does not indirectly overwrite this item.
-
+Deleting/disabling definitions does not clear existing result values. Renaming an internal field does not migrate old values. Unmapped or absent columns cannot be updated indirectly through Points JSON.
 
 ### 11.7.1 Verification Recommendations
 
-- Capture pair: check the successful hornet and captured honeybee throughout the analysis range, not only at the capture frame.
-- Exposed bees: focus on boxes most likely to affect statistics for low-positioned/isolated opportunities.
-- Other hornets: check frame-by-frame counts and positions; unrelated individuals may have discontinuous IDs, but this does not justify overlooking many missing frames.
-- Left censored: records whether the actual interaction onset is observable, which differs from whether review has been completed.
+All three platform templates now provide these four fields, with concise Chinese questions and `1|0` QC choices:
+
+| Field | Input | Meaning |
+| --- | --- | --- |
+| `response_qc_pass` | Dropdown: `1` pass, `0` needs attention, blank unreviewed | For stimulus trials, inspect the first 2 seconds, including zero-count trials. Check for missed/double counts and ensure each counted downward response belongs to one bee. For baseline trials, inspect the actual included baseline window and distinguish real downward movement from ID-switch artifacts |
+| `spatial_qc_pass` | Dropdown: `1`, `0`, or blank | For stimulus trials, inspect the first 6 seconds, stopping at earlier contact or video end. For baseline trials, inspect the actual baseline window. Box counts and positions must support group depth, dispersion, and neighbor analysis. ID swaps alone do not prevent passing when positions are correct |
+| `reviewer` | Text, such as `WTY` | The actual reviewer's name or stable initials; the latest entry is remembered and must be changed when the reviewer changes |
+| `review_date` | Text: `YYYY-MM-DD` | Defaults to today and can be edited to the actual review date |
+
+Once either QC field is `1` or `0`, confirmation checks any enabled reviewer field is nonempty and any enabled date is a valid `YYYY-MM-DD`. Do not use `0` for an unreviewed item. A checkbox's unchecked state is an explicit negative value, not blank; keep the two QC fields as dropdowns when blank matters.
 
 ## 11.8 Synchronization and Acceptance
 

@@ -1,9 +1,10 @@
-"""Build one portable Markdown manual from the numbered source chapters."""
+"""Merge numbered Markdown chapters and link project resources in place."""
 from pathlib import Path
 import argparse
 import re
 import shutil
 import unicodedata
+import os
 from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -106,14 +107,20 @@ def merge_manual(docs, output):
             raise ValueError(f'{source.name}: unresolved link {url}')
         if not dest.is_file():
             raise ValueError(f'{source.name}: missing linked file {url}')
-        # Preserve paths inside docs; external project resources get a separate subtree.
+        # Project resources stay linked to their actual files rather than copied.
         try:
             relative = dest.relative_to(docs)
         except ValueError:
-            try:
-                relative = Path('_project')/dest.relative_to(ROOT if docs.is_relative_to(ROOT) else docs.parent)
-            except ValueError:
+            project = ROOT if docs.is_relative_to(ROOT) else docs.parent
+            if not dest.is_relative_to(project):
                 raise ValueError(f'{source.name}: asset outside project: {url}') from None
+            try:
+                link = Path(os.path.relpath(dest,output.parent)).as_posix()
+            except ValueError:  # Separate Windows drives cannot form a relative path.
+                link = dest.as_uri()
+            if parts.query: link += '?'+parts.query
+            if parts.fragment: link += '#'+parts.fragment
+            return '<'+link+'>' if ' ' in link else link
         asset = output.parent/(output.stem+'_assets')/relative
         assets[dest] = asset
         link = asset.relative_to(output.parent).as_posix()
@@ -149,12 +156,26 @@ def merge_manual(docs, output):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--docs', type=Path, required=True, help='Folder containing numbered Markdown chapters.')
-    parser.add_argument('--output', type=Path, help='Destination Markdown file; defaults to AnnotationReviewer_User_Manual.md in --docs.')
+    parser.add_argument('--docs', type=Path, help='Folder containing numbered Markdown chapters; prompts when omitted.')
+    parser.add_argument('--output', type=Path, help='Destination Markdown file; prompts when omitted, with a suggested default.')
     args = parser.parse_args()
-    output = args.output or args.docs/'AnnotationReviewer_User_Manual.md'
     try:
-        count, assets = merge_manual(args.docs, output)
+        docs = args.docs
+        if docs is None:
+            answer = input('Source document folder: ').strip().strip('"')
+            if not answer:
+                raise ValueError('Specify a document folder.')
+            docs = Path(answer).expanduser()
+        if not docs.is_dir():
+            raise ValueError(f'Document folder not found: {docs}')
+        output = args.output
+        if output is None:
+            default = docs/'AnnotationReviewer_User_Manual.md'
+            answer = input(f'Output Markdown file [{default}]: ').strip().strip('"')
+            output = Path(answer).expanduser() if answer else default
+        count, assets = merge_manual(docs, output)
+    except (EOFError, KeyboardInterrupt):
+        parser.exit(1, 'Cancelled: document folder or output was not provided.\n')
     except (ValueError, OSError) as exc:
         parser.exit(1, f'Error: {exc}\n')
     print(f'Merged {count} chapters and {assets} assets: {output.resolve()}')

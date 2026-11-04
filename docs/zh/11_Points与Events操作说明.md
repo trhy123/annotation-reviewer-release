@@ -111,35 +111,40 @@ bee_slip 记录事件时间，不要求确定蜜蜂长期 ID。事件不自动�
 
 ## 11.7 Verify 与保存核验
 
-Points 中位于 Victim 下方的 Verify 按钮和 Save / Save as 前的核验窗口记录独立的 bout 状态。窗口内项目勾选表示 true，未勾选表示 false；不要求为了允许保存而全部勾选。
+Points 中位于 Victim 下方的 Verify 按钮，以及 Save / Save as 前的核验窗口，用于记录当前 bout 的人工核验结果。下拉框的 **未核验（Not reviewed）** 保存为空；`1` 表示通过，`0` 表示待处理，二者都表示已经检查。文本框可自由填写。复选框只有勾选／未勾选两态，不能区分“未核验”和“未通过”，因此需要空白状态的项目应使用下拉框。
 
-Confirm 提交窗口中已显示项目的结果并继续相应流程；Back 放弃本次核验操作，在保存流程中会取消继续保存。未显示的项目保留当前 bout 中已有的值。
+**Confirm review** 将显示项目的结果写入当前标注并继续；标注成功保存后，才将这次确认的已启用、已映射且 Sync 开启的字段登记到当前 Boutlist 行。**Skip review** 继续保存标注，不产生本次核验登记；**Back** 取消继续保存。未显示的字段保留原值。核验窗口不设置保存范围；Confirm review 为默认按钮，空格可确认。
 
-核验窗口不包含保存范围选项。默认焦点位于 Confirm，按空格可提交确认；此时不触发 Tracking 的空格快捷键。
+Display → Boutlist fields 的 **Verify review status before saving** 控制每次 Save／Save as 是否弹出一次核验窗口。关闭文件时选择保存，仍使用同一流程。关闭总开关不改写已有核验状态，Points 的 Verify 仍可手动打开窗口。
 
-Display → Boutlist fields 提供 Verify review status before saving 总开关。开启后每次 Save／Save as 均弹出一次；关闭文件时如选择保存，也经过同一保存核验流程，不另加一次关闭核验。关闭总开关后 Save／Save as 不自动弹出核验窗口，保留原有核验状态；仍可在 Points 点击 Verify 主动打开核验窗口。
+总开关下方的定义表属于设置，不是当前 bout 的核验结果。通过 Save settings 的 Boutlist fields 或 All 范围保存并激活草稿。问题及下拉选项是用户内容，不随界面语言翻译。
 
-总开关下方为可增删的核查定义表。表中开关是设置，不是当前 bout 的核查结果。
-
-| 列 | 行为 |
+| 列 | 填写与行为 |
 | --- | --- |
-| Internal field | 核查状态的稳定内部字段；字母开头，可含数字和下划线，不得重复或占用既有 Points 字段 |
-| Enabled | 是否启用该项；停用后不询问、不同步，保留结果中已有状态 |
-| Question | 核验窗口显示的英文问题文本 |
-| Boutlist field | Boutlist 中对应的列名；空白不参与 Boutlist 读写 |
-| Sync | 是否允许从 Boutlist 读取或向其同步；要求启用、列名非空且实际存在该列 |
+| Internal field | 稳定内部字段，字母开头，可含数字和下划线；不得重复或占用既有 Points 字段 |
+| Enabled | 是否在核验窗口显示；停用后不同步，保留已有结果 |
+| Question | 显示给核验者的问题，可填写中文；按输入原样显示 |
+| Boutlist field | Boutlist 中对应的实际列名；留空时 Sync 灰显，不读写该列 |
+| Sync | 标注保存成功后，登记本次 Confirm review 的结果；要求启用、映射非空且实际存在对应列 |
+| Input type | `dropdown`：下拉框，可留空；`text`：文本；`checkbox`：两态复选框，无空白状态 |
+| Choices (a\|b\|c) | **只用于 dropdown**。用半角竖线 `\|` 分隔保存值，如 `1\|0` 或 `pass\|fail`；值直接保存，不使用 JSON，也不使用“值:说明”语法。未核验选项自动加入，不要手填空项 |
 
-使用 Add／Delete 增删定义，编辑单元格修改内容。通过 Save settings 的 Boutlist fields 或 All 范围保存并激活草稿。保存其他分组不应用本组修改。每项 Enabled 即表示在 Verify 中询问，不再设置单独的 Ask。所有项目均未启用时，Verify 为空，仅保留 Confirm／Back。核验窗口内确认的实际状态进入项目 History 和结果 SQLite；设置表修改不进入项目 History。删除或停用定义不清空已有状态，变更内部字段不自动迁移旧字段。
+下拉选项不得为空、重复或含空段，例如 `1||0` 不合法；保存设置时会提示且保留已有有效配置。选择 text 或 checkbox 会立即清空并禁用 Choices；直接在 INI 中为这两种类型填写的 options 也会被忽略。Question 列可手动拖动表头边界调整宽度；输入类型下拉框只显示一份文字。
 
-**例：** 新增 `identity_checked`，启用并填写问题，Sync 关闭。该问题会出现在 Verify，回答保存到结果 SQLite，但不询问 Boutlist 同步。之后在 Boutlist 增加 `identity_checked` 列，在配置表指定该列并开启 Sync，保存配置后方可同步。未指定 Boutlist field 时，Sync 灰显且自动取消勾选。未配置或缺失对应列时，不通过 Points JSON 间接改写该项。
-
+删除或停用定义不清除结果中已有值；改变内部字段不会迁移旧字段。未映射或缺失的列，也不能通过 Points JSON 间接更新。
 
 ### 11.7.1 核验建议
 
-- Capture pair：检查整个分析范围的得手胡蜂和被捕蜜蜂，不只看捕获那一帧。
-- Exposed bees：重点检查最容易影响低位/孤立机会统计的框。
-- Other hornets：检查逐帧数量与位置，允许无关个体 ID 不连续，但不能因此忽略大量漏帧。
-- Left censored：记录是否能观察互动真实起点，与“已经核验”不是同一种含义。
+三个平台模板默认包含以下四项，问题使用简洁中文，QC 项的选项为 `1|0`：
+
+| 字段 | 输入 | 核验含义 |
+| --- | --- | --- |
+| `response_qc_pass` | 下拉框 `1` 通过、`0` 待处理，空白未核验 | 刺激段检查前2秒，包括程序计数为零的 trial；无漏计或重复计数，每个计入响应的下移属于同一只蜂。Baseline 检查实际纳入分析的完整基线窗口，区分真实下移与串ID产生的假下移 |
+| `spatial_qc_pass` | 下拉框 `1`、`0` 或空白 | 刺激段检查前6秒，提前接触或录像提前结束时看到实际终点；Baseline 检查实际基线窗口。蜂框数量与位置应足以进行群体深度、分散和邻近关系分析；位置正确时，单纯ID交换不影响通过 |
+| `reviewer` | text，如 `WTY` | 本次实际核验人的姓名或固定缩写；软件记住最近填写者，换人时修改 |
+| `review_date` | text，`YYYY-MM-DD` | 默认当天，可改成实际核验日期 |
+
+QC 任一项选择 `1` 或 `0` 后，确认时会检查已启用的核验人不为空、日期为真实有效的 `YYYY-MM-DD`。未核验保持空白；不要用 `0` 代替未核验。若改用 checkbox，未勾选就是明确的否定值，无法留空，建议这两个 QC 字段保留 dropdown。
 
 ## 11.8 同步和验收
 
