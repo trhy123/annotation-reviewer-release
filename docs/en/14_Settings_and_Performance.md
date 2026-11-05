@@ -58,7 +58,7 @@ The small number of interactive Tracking boxes may still be drawn by Qt alongsid
 
 Trail shader computes color, width, and opacity from point frame age during GPU drawing, reducing per-frame reconstruction of gradient appearance. It applies to supported playback trails, pending Tracking trails, and OpenGL export, and does not require CUDA.
 
-Enabling the shader does not change trajectory coordinates or match results. Unsupported styles or drawing configurations use the existing rendering path, with the fallback reason shown in status. Geometric styles such as wavy lines and color gradients are different computations; one shader switch should not be assumed to accelerate every style.
+Enabling the shader does not change trajectory coordinates or match results. Solid, dashed, dotted, dash-dot and wavy lines are supported. Patterns follow accumulated trajectory distance rather than restarting at each interpolation subdivision. If the shader is unavailable, the existing rendering path is used and status explains the fallback.
 
 ### 14.3.3 Packets, caches, and parallelism parameters
 

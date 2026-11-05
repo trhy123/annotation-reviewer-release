@@ -815,7 +815,7 @@ shader 是在图形设备上执行的绘制程序。这里用于根据轨迹点�
 | OpenGL，启用 Gradient shader 且可用 | 播放、Tracking 待提交 trail 和 OpenGL 视频导出共享渐变绘制路径 |
 | 关闭 Gradient shader | 使用原有轨迹绘制路径 |
 | Qt raster | 使用 Qt 绘制，不执行该 OpenGL shader |
-| wave 波浪线样式 | 使用已有支持该样式的路径，状态说明回退 |
+| wave 波浪线样式 | OpenGL shader 直接支持；Qt/CPU 路径也可显示，不改变轨迹坐标 |
 | shader 编译或配置不可用 | 显示回退原因，并使用已有绘制路径继续显示 |
 
 Template/Search 框、控制手柄、曲线预览和悬停圆环等少量交互元素保留 Qt 绘制。标注框及轨迹使用已有 Qt/OpenGL 标注后端。启用 Gradient shader 不需要 CUDA，也不启用 GPU 模板匹配。

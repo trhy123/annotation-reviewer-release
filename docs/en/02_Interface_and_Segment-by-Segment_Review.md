@@ -153,7 +153,7 @@ Frame range on the line below Always trail IDs limits the actual frames allowed 
 | Start/end width | Displayed line width near the current frame and at the far end |
 | ID colors / unique colors | Uses identity colors or one custom color |
 | far HSV | Adjusts saturation and brightness of the far-end color |
-| Style | Solid, dashed, dotted, and supported wavy styles; does not change actual coordinate points |
+| Style | Solid, dashed, dotted, and wavy lines. Trail After defaults to dotted; selecting solid displays a solid line. Styles do not change trajectory coordinates |
 
 Gradients help identify movement direction and temporal order; they are not numerical speed maps. A connecting line does not prove that every intervening frame contains a real detection; inspect actual rows and source fields.
 

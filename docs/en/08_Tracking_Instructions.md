@@ -815,7 +815,7 @@ A shader is a rendering program executed on a graphics device. Here it calculate
 | OpenGL with Gradient shader enabled and available | Playback, pending Tracking trails, and OpenGL video export share the gradient rendering path |
 | Gradient shader disabled | Uses the existing trajectory rendering path |
 | Qt raster | Uses Qt rendering without executing this OpenGL shader |
-| wave line style | Uses an existing path supporting that style, with fallback described in status |
+| wave line style | Supported directly by the OpenGL shader and by Qt/CPU paths; does not change trajectory coordinates |
 | Shader compilation or configuration unavailable | Displays the fallback reason and continues with an existing rendering path |
 
 Small sets of interactive elements such as Template/Search boxes, control handles, curve previews, and hover rings retain Qt rendering. Annotation boxes and trajectories use the existing Qt/OpenGL annotation backend. Enabling Gradient shader does not require CUDA or enable GPU template matching.
