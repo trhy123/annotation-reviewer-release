@@ -112,7 +112,7 @@ Chinese interface text uses the external [`translations/zh_CN.json`](../../trans
 | Point to Selection | Use an arrow to help locate the selected target |
 | Keep arrow visible | Retain the corresponding selection indicator |
 | Seek preview | Display a video thumbnail when hovering over or dragging the progress bar, without annotations or changes to the main image |
-| Width px | Thumbnail width; default 240, range 80–640; height is calculated proportionally |
+| Width px | Thumbnail width; default 240, range 80–999; height is calculated proportionally |
 | Idle layer cache | Prepare reusable layers while idle to reduce later repeated drawing |
 | Overlay cache directory | Display-cache directory, not the formal result-output directory |
 
@@ -131,6 +131,8 @@ The save bar for all page settings sits at the bottom, outside every group. Its 
 **Example:** Change both Box line width and Boutlist column names, then save with scope Box. Only line width is persisted. Boutlist saving still uses the original column names, and Unsaved continues showing Boutlist fields. New names take effect only after that group is selected and saved.
 
 Recovery and display-cache directories serve different purposes. Do not treat cache files as annotation SQLite, or delete an original-data directory merely because the cache directory changes.
+
+**Reset**, between the scope list and Save settings, restores the selected scope to its saved values while keeping unsaved drafts in other groups. All restores every Display group. Reset does not write settings.ini and does not restore factory defaults.
 
 ## 14.6 Profiler
 

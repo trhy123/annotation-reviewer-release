@@ -2794,5 +2794,10 @@
   "— fps / —×": "— 帧/秒 / —×",
   "简体中文": "简体中文",
   "Far at:": "远端帧距：",
-  "Frame distance that reaches the far color, opacity and width. Blank: Auto uses Frames, or the shared farthest frame of the displayed IDs when All is enabled. Beyond this distance, the far style stays constant.": "达到远端颜色、透明度和线宽所需的帧距。留空为自动：使用设置的帧数；开启全部帧时，使用本组显示身份的最远帧距。超过该距离后保持远端样式。"
+  "Frame distance that reaches the far color, opacity and width. Blank: Auto uses Frames, or the shared farthest frame of the displayed IDs when All is enabled. Beyond this distance, the far style stays constant.": "达到远端颜色、透明度和线宽所需的帧距。留空为自动：使用设置的帧数；开启全部帧时，使用本组显示身份的最远帧距。超过该距离后保持远端样式。",
+  "Thumbnail width in logical pixels (80–999); height follows the video aspect ratio. Save with the Others settings group.": "缩略图显示宽度为 80–999 逻辑像素，高度随视频比例调整；随“其他”分组保存。",
+  "Compact SQLite save": "精简保存 SQLite",
+  "Save current annotations and required metadata without edit logs or audit history. Keep the current Raw choice. Compact saving rewrites the file and may take longer.": "保存当前标注及必要元数据，不保留操作日志和审计历史。沿用当前 Raw 保存选择。精简保存会重写并压缩文件，耗时可能较长。",
+  "In Edit mode, move to the lower-right corner of the current cell and drag along its row or column. On release, choose Copy fill or Fill series. Copy fill repeats the original text. Fill series increments numeric values by 1 down or right, decrements them by 1 up or left, and preserves leading zeros and decimal places; other text is copied. The entire fill is saved together and can be undone in one step. Select adjacent cells in one row to fill several columns together up or down, independently per column.": "在编辑模式中，将鼠标移到当前单元格右下角，拖动填充柄可沿行或列填充。松开后选择“复制填充”或“序列填充”。复制填充重复原文字；序列填充将数字向下或向右逐项加 1，向上或向左逐项减 1，保留前导零及小数位，其他文字原样复制。选择同一行内相邻的多个单元格，可同时向上或向下填充多列，各列独立计算。整次填充一次保存，可一步撤销。",
+  "Restore saved settings for the selected scope. Keep unsaved changes in other groups.": "将所选范围恢复为已保存的设置，保留其他分组尚未保存的修改。"
 }
