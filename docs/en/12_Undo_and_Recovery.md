@@ -54,7 +54,7 @@ The columns are `#`, `Time`, `Op`, `IDs`, `Frames`, and `Details`, used to check
 
 Undo moves back one step in the current command stack; Redo restores one undone step. A new edit after undo may create a new history branch; the old Redo chain is not a permanent backup.
 
-After Save writes back to the current annotation file, the current session's Undo/Redo remains available. Default saving retains concise history and row-level audits inside SQLite, omitting command payloads that cannot restore cross-session undo. Compact SQLite save removes these histories and audits. Reopening a file does not restore its previous undo stack; new operations remain undoable. Old command archives and the `_edit_log.txt` exported with CSV are read-only. Recovery snapshots separately store session state using the existing `.pkl` mechanism.
+After Save writes back to the current annotation file, the current session's Undo/Redo remains available. Default saving retains concise history and row-level audits inside SQLite, omitting command payloads that cannot restore cross-session undo. Compact save removes these histories and audits. Reopening a file does not restore its previous undo stack; new operations remain undoable. Old command archives and the `_edit_log.txt` exported with CSV are read-only. Recovery snapshots separately store session state using the existing `.pkl` mechanism.
 
 **Procedure:** Pause and finish the current interaction → inspect recent command IDs/Frames → Undo → check the canvas and tables → Redo if needed → save again.
 

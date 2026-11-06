@@ -29,9 +29,9 @@ After entering Hive setup, the axis preview follows the mouse until the first im
 
 In the marker area below the progress bar, clicking directly beneath the Start or End symbol at the height of the Capture arrow also navigates to the corresponding frame. At a recorded Start, End, or Capture frame, the corresponding text appears at the lower left of the image in the Events HUD style. If several markers or events share a frame, their labels appear together. Playback previews and video exports with HUD enabled use the same labeling rules.
 
-A Notes field records brief facts relevant to interpretation and analysis, such as uncertainty due to occlusion or unusual clip conditions.
+The third Points row contains Compact save, Target seg only, Verify, and Notes. Compact save retains only required result data in SQLite; see [saving and file size](01_Basic_Operations.md). Verify opens review verification; Notes records brief facts relevant to interpretation and analysis, such as uncertainty due to occlusion or unusual clip conditions.
 
-`Save only the target segment` on the third Points row controls whether Save and Save as save only final annotations within Start–End, including both endpoints; data outside the range is not deleted from memory. This is a session-specific save range choice, not an INI setting, and resets when closing or changing files.
+`Target seg only` on the third Points row controls whether Save and Save as save only final annotations within Start–End, including both endpoints; data outside the range is not deleted from memory. This is a session-specific save range choice, not an INI setting, and resets when closing or changing files.
 
 ## 11.3 Information Field Definitions
 

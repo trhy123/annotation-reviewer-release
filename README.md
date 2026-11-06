@@ -224,4 +224,4 @@ The public build workflow includes path and configuration tests for Windows, mac
 
 See the [English user manual](docs/en/00_Annotation_Reviewer_User_Manual.md) or [中文操作手册](docs/zh/00_操作手册.md). Each feature has its own chapter.
 
-The interface defaults to English. Select Simplified Chinese in Display → Others → Language, save settings, and restart to apply it. The Classes table lets you maintain model class numbers, names, and descriptions directly. Event and review descriptions and dropdown labels are editable project settings in `settings.ini`.
+The interface defaults to English. Select Simplified Chinese in Display → Others → Language to apply it immediately; save Others or All to keep the choice for the next run. The Classes table lets you maintain model class numbers, names, and descriptions directly. Event and review descriptions and dropdown labels are editable project settings in `settings.ini`.

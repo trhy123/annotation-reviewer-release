@@ -3,6 +3,7 @@
 - [下载程序](https://github.com/trhy123/annotation-reviewer-release/releases)
 - [查看用户操作手册 (中文)](docs/zh/00_操作手册.md)
 - [View user manual (English)](docs/en/00_Annotation_Reviewer_User_Manual.md)
+
 请在 Releases 中选择版本和平台下载。离线用户文档 PDF 也在 Release 的附件中。
 使用同一版本的 `SHA256SUMS.txt` 校验平台压缩包；分卷包请同时下载该版本的重组说明。
 各版本标签保留对应版本的文档；仓库自动生成的 Source code 压缩包只包含本仓库的文档。
@@ -223,4 +224,4 @@ Actions 的 `Optional release tag; blank uses build-<run number>` 同时决定 R
 
 操作手册参见 [中文版](docs/zh/00_操作手册.md) / [English version](docs/en/00_Annotation_Reviewer_User_Manual.md)，各功能说明独立成文件。
 
-界面语言默认英文，在 Display → Others → Language 可选择简体中文，保存设置并重启生效。Classes 表格可直接维护模型编号、类别和说明。Events／核验说明、下拉选项显示文字均在软件中编辑并保存到 `settings.ini`。
+界面语言默认英文，在 Display → Others → Language 选择简体中文后立即生效；保存 Others 或 All 后供下次启动使用。Classes 表格可直接维护模型编号、类别和说明。Events／核验说明、下拉选项显示文字均在软件中编辑并保存到 `settings.ini`。

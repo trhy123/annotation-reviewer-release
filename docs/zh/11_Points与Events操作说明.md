@@ -29,9 +29,9 @@ Hive、Captor、Victim 使用待提交选择。点击按钮进入选择状态，
 
 在进度条下方标记区点击 Start、End 符号正下方与 Capture 箭头同高的位置，也可定位到对应帧。定位到已经设置的 Start、End 或 Capture 帧时，画面左下角按 Events 的 HUD 样式显示相应文字。同一帧兼有多个标记或事件时，标签同时显示。播放预览与启用 HUD 的视频导出使用一致的标签规则。
 
-另设有 Notes 输入框用于记录影响理解和分析的简短事实，例如遮挡不确定性或特殊片段条件。
+Points 第三行依次为 Compact save（精简保存）、Target seg only（仅目标段）、Verify（核验）和 Notes（备注）。精简保存仅保留 SQLite 的必要结果数据，详见[保存与文件体积](01_基础操作说明.md)；Verify 打开核验窗口，Notes 记录影响解释和分析的简要事实，例如遮挡不确定性或片段异常情况。
 
-Points 第三行的 `Save only the target segment` 控制 Save 与 Save as 是否仅保存 Start–End 内的最终标注，包含两端；不删除范围外内存数据。该选项为当前会话的保存范围选择，不作为配置项写入 INI，关闭或更换文件时复位。
+Points 第三行的 `Target seg only` 控制 Save 与 Save as 是否仅保存 Start–End 内的最终标注，包含两端；不删除范围外内存数据。该选项为当前会话的保存范围选择，不作为配置项写入 INI，关闭或更换文件时复位。
 
 ## 11.3 各信息字段的含义
 
