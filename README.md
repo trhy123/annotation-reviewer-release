@@ -45,6 +45,7 @@ AnnotationReviewer-<platform>/
 ├─ runtime/{bin,lib,licenses}/                  # FFmpeg, FFprobe, and libmpv
 ├─ settings.ini                                 # User configuration
 ├─ presets_detection/                           # Detection postprocessing presets
+├─ translations/                                # UI language files
 ├─ cache/{overlay_layers,pts,recovery}/         # Caches and recovery data
 └─ models/                                      # Model weights
 ```
@@ -60,6 +61,7 @@ AnnotationReviewer-macos-<arch>/
 │  └─ Resources/                                # Default configuration, presets, licenses
 ├─ settings.ini                                 # User configuration
 ├─ presets_detection/                           # Detection postprocessing presets
+├─ translations/                                # UI language files
 ├─ cache/{overlay_layers,pts,recovery}/         # Caches and recovery data
 ├─ models/                                      # Model weights
 └─ cleanup_macos.command                        # macOS shared configuration cleanup script
@@ -224,4 +226,10 @@ The public build workflow includes path and configuration tests for Windows, mac
 
 See the [English user manual](docs/en/00_Annotation_Reviewer_User_Manual.md) or [中文操作手册](docs/zh/00_操作手册.md). Each feature has its own chapter.
 
-The interface defaults to English. Select Simplified Chinese in Display → Others → Language to apply it immediately; save Others or All to keep the choice for the next run. The Classes table lets you maintain model class numbers, names, and descriptions directly. Event and review descriptions and dropdown labels are editable project settings in `settings.ini`.
+The interface defaults to English. Choose a language in Display → Others → Language or press **Alt+L** to cycle through the list. Changes apply immediately. Save settings can keep the language choice for the next launch.
+
+To add a language, copy `translations/zh_CN.json` to a locale filename such as `fr_FR.json`. Set the display `name` in the first object and translate the values in the second, keeping the English keys and format fields such as `{v0}`. **Browse** next to Language imports a usable JSON file and selects it immediately. Opening the language list or cycling languages discovers catalogues in `translations/` beside the executable or the macOS `.app`. A standalone macOS app imports into `~/Library/Application Support/AnnotationReviewer/translations/`. At startup the application loads the configured language. Missing or unusable translations fall back to English.
+
+`settings.ini` and language JSON files support UTF-8 with or without a BOM.
+
+The Classes table lets you maintain model class numbers, names, and descriptions directly. Event and review descriptions and dropdown labels are editable project settings in `settings.ini`.

@@ -46,7 +46,7 @@ For example, Range=`100` searches across all frames, rather than only frame 100;
 
 - All frames off: retain only the annotation records for each ID that actually meet the rectangle condition. The shared Range displays the union of these frame intervals, and the yellow strip shows the same local scope. An entire ID is not selected merely because it enters the rectangle in one frame. Immediately following deletion, class changes, ID changes, or geometry changes operate on these records.
 - All frames on: the rectangle identifies identities, and subsequent operations cover all frames of those identities. The local restriction to frames entering the rectangle is not retained.
-- Accumulate on: append newly matched records to the existing selection; when off, replace the previous selection with the new results.
+- With Accumulate on, dragging adds matches to the selection. Hold Shift while releasing the rectangle to subtract matching rows or identities, according to the frame scope. With Accumulate off, dragging replaces the selection.
 
 Exiting Choose range does not change All frames. Other selections or inputs may change the scope of subsequent editing. When performing several changes in succession, repeat the rectangle selection and check ID/Range. For the data layers in Raw/postprocessing previews, see the [Detection volume](04_Detection_Postprocessing_Tests.md); these layers must not be confused with the main review table.
 
@@ -200,6 +200,8 @@ A/B each contains frame, id, x, y, w, and h. Selected as A/B copies the selected
 
 Click A: or B: at the start of a row to navigate to that endpoint. A valid frame enables precise navigation; an existing id selects the automatic identity or entire manual trajectory. The two are evaluated independently; missing, malformed, or nonexistent items are silently skipped without an error dialog. If the identity is absent at the target frame, it can remain selected while navigation goes to the entered frame, rather than automatically jumping to its nearest occurrence. For example, with frame=400 and id=7, if ID 7 appears only before frame 390 and after frame 410, clicking still goes to 400 to inspect the gap. Entering only id retains the current frame; entering only frame retains the current selection.
 
+With one automatic ID, All frames off, and more than one frame in the shared Range, either Selected as A/B button captures the exact frame ranges. A/B display the outer endpoints. Choose range → Over time can supply this selection. Interpolate interval first fills bounded gaps within the selection. When there are no gaps, you can confirm linear replacement for each selected segment, with nearby observations used for isolated frames. Delete includes the selected endpoints by default. Editing an A/B frame or ID returns to the regular endpoint workflow.
+
 The C button at the lower left clears all inputs in both A/B rows, cached endpoint geometry, and the associated progress-bar markers.
 
 Endpoint entry does not require all information at once. With no box or manual point selected, the current frame is still recorded; if only an ID is selected, its identity is also recorded. Coordinates and dimensions can be completed later. Changing the frame or identity does not reuse old geometry from another endpoint observation. Required information is checked for completeness only when Interpolate interval is executed. On the Interpolate page, A/B letters below the progress bar mark entered endpoint frames and support click-to-navigate; the markers are hidden on other pages.
@@ -246,7 +248,7 @@ Select two reliable endpoints around the incorrect segment and confirm interval 
 4. Endpoints are retained by default and only internal frames are deleted. Check Include endpoints to delete them as well.
 5. Click Delete and inspect the result; undo this operation if restoration is required.
 
-This Delete reads only A/B and the target explicitly specified in the dialog. It does not read shared ID, Range, or All frames, and does not require complete endpoint geometry. For example, A=100, B=110, and target ID 7 deletes only frames 101–109 of that ID by default; other identities and shared inputs remain independent. Canceling the dialog or having no internal frames leaves data unchanged. The entire deletion is one undo operation for the corresponding data source.
+With regular A/B endpoints, Delete uses those endpoints and the target in the dialog. Endpoint geometry may be left blank. For example, A=100, B=110, and target ID 7 deletes frames 101–109 of that ID by default. The entire deletion is one undo operation for the corresponding data source.
 
 ## 5.6 Swap: identity exchange and position-based correction
 

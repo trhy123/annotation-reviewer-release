@@ -118,6 +118,8 @@ When Boutlist configures and supplies a valid complete `scale_calibration`, it c
 
 Select bout is an independent nonmodal window, selectable from the taskbar, with standard minimize, maximize, and close buttons. Keep the table open while playing, seeking, and checking annotations in the main window.
 
+The open bout has a pale yellow background. Click a row number to select that row. Double-click a column name to sort.
+
 Pressing Open Boutlist again activates the existing window; when the current bout can be identified reliably, its row is centered and selected automatically. Sorting the table changes neither source file row order nor current row identity.
 
 The bottom buttons, from left to right, are Edit, ↶, ↷, Browse, and Open. Select a row and double-click or press Open to switch to the main window and open its bout. If the selected bout is already open, this only switches to the main window without reloading files. Outside editing mode, double-clicking a cell also opens its row.
@@ -169,7 +171,7 @@ Write-back updates only corresponding mapped fields, leaving other columns and u
 
 Complete `scale_calibration` JSON is always written to output annotation SQLite. Boutlist fields allows independent column names for `scale_px_per_cm` and `scale_calibration`, both of which can be enabled together. JSON columns for `info_points`, `info_events`, and `camera_anchor_keyframes` can also be enabled. Clearing a field only grays out its item label; the input remains editable. After Save settings (All or Boutlist fields), reading and writing stop for that item without clearing existing table content. Default mappings enable same-named columns present in the current Boutlist and leave other items blank; saved custom mappings take precedence. If Points JSON and separate scalar fields coexist, nonempty separate scalar fields take precedence. Loading annotation SQLite still uses the existing source-selection dialog for metadata conflicts.
 
-Add, remove, and configure review fields in the Boutlist fields review definition table. Enabled enables the item and its Verify question; Sync controls synchronization with existing columns. If the column name is blank, the item is disabled, or Sync is off, the corresponding Boutlist status is neither read nor overwritten. Review states can still be saved independently in result SQLite. Activate configuration through Save settings with the Boutlist fields/All scope.
+Configure review fields in the Boutlist fields review definition table. Enabled shows the question in Verify. Sync and an existing mapped column make the answer editable. Review answers are stored in the corresponding Boutlist row. Activate configuration through Save settings with the Boutlist fields or All scope.
 
 Events, frame-by-frame positions, template images, and complete History are not stored individually in this table. When multiple people or instances edit the same CSV, avoid overwriting the same records and rely on pre-write difference checks.
 

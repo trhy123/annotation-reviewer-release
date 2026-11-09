@@ -23,7 +23,9 @@ Open `Edit → Trajectory`, between the Swap and Scale subtabs. Modes appear in 
 3. With `Set` released, clicking `A:` or `B:` navigates to the stored endpoint without changing its input value.
 4. Inspect the orange range strip and click `Preview` to create a preview.
 
-A and B are both included, regardless of order. A = 300 and B = 200 selects 200–300. The fields are initially empty; a local-range preview requires both endpoints. Check **All frames** in the shared Edit area to use the entire selected ID. Press **<500>** to use a window extending 500 frames before and after the current frame; this overrides All frames. Turning it off restores the original A/B or All frames scope. Setting endpoints or switching modes does not automatically enter editing.
+A and B are both included, regardless of order. A = 300 and B = 200 selects 200–300. With one automatic ID, the shared **Range** can also supply multiple frames or disjoint segments for Preview. The priority of the operation range is: the **<500>** window takes priority, followed by **All frames**, shared Range, and A/B. Setting endpoints or switching modes does not automatically enter editing.
+
+Choose range → Over time highlights the selected trajectory portions with directional curves. A single ID is yellow, and multiple IDs use their assigned colors. Preview shows the editable trajectory in orange.
 
 **<500>** is independent of ID and A/B inputs and can always be enabled or resized; creating a Preview still requires a selected ID. Double-click the button quickly to turn it into an integer field. Enter a positive integer and press Enter or move focus away to update its label, for example <1000>. Esc abandons the value change. With the window enabled, changing its frame count or navigating to a new frame immediately updates the orange range strip, without first entering Preview or pressing Set again.
 

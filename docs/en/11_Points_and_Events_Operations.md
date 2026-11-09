@@ -29,9 +29,9 @@ After entering Hive setup, the axis preview follows the mouse until the first im
 
 In the marker area below the progress bar, clicking directly beneath the Start or End symbol at the height of the Capture arrow also navigates to the corresponding frame. At a recorded Start, End, or Capture frame, the corresponding text appears at the lower left of the image in the Events HUD style. If several markers or events share a frame, their labels appear together. Playback previews and video exports with HUD enabled use the same labeling rules.
 
-The third Points row contains Compact save, Target seg only, Verify, and Notes. Compact save retains only required result data in SQLite; see [saving and file size](01_Basic_Operations.md). Verify opens review verification; Notes records brief facts relevant to interpretation and analysis, such as uncertainty due to occlusion or unusual clip conditions.
+The third Points row contains Compact save, Target only, Verify, and Notes. The Compact save checkbox is used to set the history save mode of SQLite. The Target only checkbox is used to set whether to save only the interval from Start to End. Notes records facts relevant to interpretation and analysis, such as uncertainty due to occlusion or unusual clip conditions. [Saving and file size](01_Basic_Operations.md)
 
-`Target seg only` on the third Points row controls whether Save and Save as save only final annotations within Start–End, including both endpoints; data outside the range is not deleted from memory. This is a session-specific save range choice, not an INI setting, and resets when closing or changing files.
+`Target only` limits Save and Save as to final annotations within Start–End, including both endpoints. The choice applies to the current session and resets when closing or changing files.
 
 ## 11.3 Information Field Definitions
 
@@ -113,7 +113,7 @@ Each event occupies one table column; events containing the current frame are hi
 
 The Verify button below Victim in Points and the dialog before Save / Save as record the current bout's manual review. **Not reviewed** stores an empty value; `1` means pass and `0` means needs attention. Both numeric values mean the item was checked. Text fields accept free input. A checkbox has only checked/unchecked states and cannot represent an unreviewed blank; use a dropdown when that distinction matters.
 
-**Confirm review** commits the displayed answers to the annotation. After that annotation is saved successfully, the confirmed enabled fields with Sync and an existing mapped column are registered in the current Boutlist row. **Skip review** continues saving without registering a new review; **Back** cancels saving. Hidden fields retain their values. The dialog does not set the save range. Confirm review is the default button and accepts Space.
+In Points → Verify, **Confirm review** writes answers to the current Boutlist row immediately. The dialog shown before saving writes confirmed answers after the result is saved successfully. Editable fields require Sync and an existing mapped column. **Skip review** continues the save, and **Back** cancels it.
 
 The master **Verify review status before saving** switch in Display → Boutlist fields opens the dialog once per Save / Save as, including saving while closing a file. Turning it off preserves existing review data. Verify in Points remains available manually.
 

@@ -45,6 +45,7 @@ AnnotationReviewer-<platform>/
 ├─ runtime/{bin,lib,licenses}/                  # FFmpeg、FFprobe、libmpv
 ├─ settings.ini                                 # 配置文件
 ├─ presets_detection/                           # 检测后处理预设
+├─ translations/                                # 界面语言文件
 ├─ cache/{overlay_layers,pts,recovery}/         # 缓存与恢复
 └─ models/                                      # 模型权重文件目录
 ```
@@ -60,6 +61,7 @@ AnnotationReviewer-macos-<arch>/
 │  └─ Resources/                                # 默认配置、预设、许可证
 ├─ settings.ini                                 # 配置文件
 ├─ presets_detection/                           # 检测后处理预设
+├─ translations/                                # 界面语言文件
 ├─ cache/{overlay_layers,pts,recovery}/         # 缓存与恢复
 ├─ models/                                      # 模型权重文件目录
 └─ cleanup_macos.command                        # MacOS 公共目录配置清理脚本
@@ -224,4 +226,10 @@ Actions 的 `Optional release tag; blank uses build-<run number>` 同时决定 R
 
 操作手册参见 [中文版](docs/zh/00_操作手册.md) / [English version](docs/en/00_Annotation_Reviewer_User_Manual.md)，各功能说明独立成文件。
 
-界面语言默认英文，在 Display → Others → Language 选择简体中文后立即生效；保存 Others 或 All 后供下次启动使用。Classes 表格可直接维护模型编号、类别和说明。Events／核验说明、下拉选项显示文字均在软件中编辑并保存到 `settings.ini`。
+界面语言默认英文，可在 Display → Others → Language 选择，或按 **Alt+L** 按列表顺序循环切换。切换即时生效。保存设置可保留下次启动使用的语言。
+
+添加语言时，将 `translations/zh_CN.json` 复制为新的区域代码文件，例如 `fr_FR.json`。在第一个对象中填写显示名称 `name`，在第二个对象中翻译值，保留英文键及 `{v0}` 等占位符。Language 右侧的 **Browse** 可导入有效的 JSON 并立即切换。打开语言列表或循环切换时，程序扫描可执行程序或 macOS `.app` 同级的 `translations/`。单独移动 macOS `.app` 后，导入目录为 `~/Library/Application Support/AnnotationReviewer/translations/`。启动时只读取设置指定的语言。缺失或无效的翻译使用英文。
+
+`settings.ini` 和语言 JSON 文件为 UTF-8 编码，有无 BOM 均可。
+
+Classes 表格可直接维护模型编号、类别和说明。Events／核验说明、下拉选项显示文字均在软件中编辑并保存到 `settings.ini`。

@@ -276,7 +276,7 @@ Finish in Tracking, Apply in Trajectory, and Apply in Scale commit the current o
 1. Complete the current edit: use Finish/Cancel in Tracking, Apply/Discard in Trajectory, and Apply or cancel in Scale; end Continuous editing.
 2. Check keyframes, both trajectory ends, identity transitions, and metadata.
 3. Click Save (Ctrl + S) to write back to the current SQLite file, retaining its filename without appending a date and time. When formally saving an old CSV for the first time, select a SQLite destination; the default filename contains no date and time.
-4. Use Save as (Ctrl + Shift + S) to retain an intermediate version or export a legacy format. The default filename has a `YYYYMMDD_HHMMSS` suffix; the format can be SQLite result or Legacy CSV. `Target seg only` in Edit → Points applies to both save entry points: unchecked saves all working annotations, while checked saves only final annotations within Start–End. This option is independent of the save verification switch.
+4. Use Save as (Ctrl + Shift + S) to retain an intermediate version or export a legacy format. The default filename has a `YYYYMMDD_HHMMSS` suffix. Choose SQLite result or Legacy CSV. In Edit → Points, enable `Target only` to save final annotations within Start–End. With the option cleared, both save commands include all working annotations. This option is independent of the save verification switch.
 5. When save verification is enabled, record the actual verification status of each item in the window; only questions enabled in Display → Boutlist fields are shown. Incomplete items may remain unchecked; do not falsely claim verification merely to save. After Confirm, wait for the background success message; Back cancels saving. CSV is provided only for compatibility export; see 1.5.5.
 6. If prompted to write back to Boutlist, check the record and fields before choosing; this is separate from writing the annotation SQLite file.
 7. Reopen the output and spot-check keyframes and metadata.
@@ -308,7 +308,8 @@ Each video uses one SQLite result file containing final working annotations, met
 | `events` | Ordered event records |
 | `metadata` | Video information, Points, complete Scale, Camera, parameters, and source information |
 | `history` | Displayable operation history |
-| `history_commands` | Legacy command archive; ordinary GUI saves omit large parameter payloads that cannot restore cross-session undo |
+| `history_commands` | Legacy command archive, cleared by GUI saves |
+| `history_undo` | Replay state for full saves, tied to the committed revision |
 
 The in-memory DataFrame and edit/undo behavior remain unchanged. Save / Save as freezes the data required for this save and synchronizes the database transactionally in a background thread; edits not yet saved are not written prematurely to the formal result. The database does not generate an additional `_edit_log.txt` or result metadata sidecar. Temporary `-wal` and `-shm` files may exist during SQLite writes and are managed by SQLite; copying only the main file during writing does not provide a complete backup.
 
@@ -326,17 +327,23 @@ If the result file is moved or deleted while open, the in-memory working annotat
 
 Deleting a recovery snapshot deletes only the selected snapshot. Directory cleanup is allowed only for recovery session directories managed by the application; annotations, videos, and other files beside external manual snapshots are excluded from cleanup. A recovery directory containing SQLite or other non-recovery files is retained.
 
-Default saving retains concise operation history and row-level audit deltas, omitting large command parameters that cannot restore cross-session undo. Files can grow with actual edits and audit records; unchanged saves do not append another complete result. Saving retains undo within the current session. After reopening, previous logs remain read-only rather than reversible undo state; recovery is separate.
+**Compact save** in Edit → Points cycles through three SQLite save modes.
 
-**Compact save** in Edit → Points is unchecked by default. When checked, Save / Save as retains current annotations, Points, Events, verification, Scale, Camera, manual trajectories and required parameters/source metadata, and removes operation history, command archives, row audits and save-transaction records. The existing Raw choice still applies. Compact saving builds and vacuums a temporary database before replacing the destination; failures preserve the original. It is slower than an ordinary incremental save and is useful for reclaiming accumulated history space or delivering results. Unchecking it resumes concise logs and audits for subsequent edits; history already removed from the file cannot be recreated.
+| State | Saved data |
+| --- | --- |
+| Unchecked (default) | Complete result, concise log, row-level audit, and the Undo/Redo state for reopening the project. Reopening a valid undo archive selects this mode again. |
+| Partly checked | Result, concise log, and row-level audit. Saved history appears in gray after reopening. |
+| Checked | Current annotations and required metadata, including Points, Events, Scale, Camera, and saved manual trajectory data. |
+
+All three modes retain the current in-memory Undo/Redo stack and follow the existing Raw choice. With **Target only**, the unchecked and partly checked states save the segment with logs and audits. CSV always uses compact export. Compact SQLite saving builds and vacuums a temporary database before replacing the destination. A failure preserves the original file.
 
 Legacy CSV can be opened, appended, or used to replace a source. After importing, save as `.sqlite` to complete conversion; the original CSV is retained. To retain both a full database and a segment, use Save as to output a separate database; segments always retain original frame numbers.
 
 ### 1.5.5 Legacy CSV Compatibility Export
 
-Legacy CSV in Save as outputs a UTF-8 BOM frame-by-frame result table, retaining public identity, class, source, confidence, review, position, manual binding, and additional fields. Video information and Points, Events, Scale, and Camera JSON are written to their corresponding cells in the first row. A same-name `.metadata.json` is also generated to retain this metadata even for an empty table, together with `_edit_log.txt` for readable history. Retain both sidecar files when moving the CSV; range export includes both endpoints and preserves original frame numbers.
+Legacy CSV in Save as outputs a UTF-8 BOM frame-by-frame result table with annotation fields and required metadata. Video information and Points, Events, Scale, and Camera JSON are written to the first row and to a same-name `.metadata.json` file. Keep that sidecar with the CSV, including for empty tables. Range export includes both endpoints and preserves original frame numbers.
 
-CSV does not contain the raw detection database, row-level audit records, or complete history_commands, and cannot replace a SQLite project. Exporting leaves the current working file path and unsaved state unchanged and does not automatically switch Boutlist to the CSV. Execute Save when complete changes must also be retained. CSV can be reimported, but complex objects in unknown extra columns become JSON text, and type inference for legacy CSV may also change leading zeros or null values; use SQLite when exact types and complete provenance are required.
+CSV is a compact interchange format for results. Use SQLite to keep raw detections, audit records, and cross-session Undo/Redo. Exporting preserves the current working file path and unsaved state. CSV reimport reads complex objects in unknown extra columns as JSON text, and type inference may change leading zeros or null values.
 
 ## 1.6 Exporting Annotated Video
 

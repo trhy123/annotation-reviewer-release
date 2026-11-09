@@ -29,9 +29,9 @@ Hive、Captor、Victim 使用待提交选择。点击按钮进入选择状态，
 
 在进度条下方标记区点击 Start、End 符号正下方与 Capture 箭头同高的位置，也可定位到对应帧。定位到已经设置的 Start、End 或 Capture 帧时，画面左下角按 Events 的 HUD 样式显示相应文字。同一帧兼有多个标记或事件时，标签同时显示。播放预览与启用 HUD 的视频导出使用一致的标签规则。
 
-Points 第三行依次为 Compact save（精简保存）、Target seg only（仅目标段）、Verify（核验）和 Notes（备注）。精简保存仅保留 SQLite 的必要结果数据，详见[保存与文件体积](01_基础操作说明.md)；Verify 打开核验窗口，Notes 记录影响解释和分析的简要事实，例如遮挡不确定性或片段异常情况。
+Points 第三行依次为 Compact save、Target only、Verify 和 Notes。Compact save 复选框用于设置 SQLite 的历史保存模式。Target only 复选框用于设置是否仅保存 Start 到 End 的部分。Verify 打开核验窗口，Notes 记录影响解释和分析的简要事实，例如遮挡不确定性或片段异常情况。[保存与文件体积](01_基础操作说明.md)
 
-Points 第三行的 `Target seg only` 控制 Save 与 Save as 是否仅保存 Start–End 内的最终标注，包含两端；不删除范围外内存数据。该选项为当前会话的保存范围选择，不作为配置项写入 INI，关闭或更换文件时复位。
+勾选 `Target only` 后，Save 与 Save as 仅保存 Start–End 内的最终标注，包含两端。此选项适用于当前会话，关闭或更换文件时复位。
 
 ## 11.3 各信息字段的含义
 
@@ -113,7 +113,7 @@ bee_slip 记录事件时间，不要求确定蜜蜂长期 ID。事件不自动�
 
 Points 中位于 Victim 下方的 Verify 按钮，以及 Save / Save as 前的核验窗口，用于记录当前 bout 的人工核验结果。下拉框的 **未核验（Not reviewed）** 保存为空；`1` 表示通过，`0` 表示待处理，二者都表示已经检查。文本框可自由填写。复选框只有勾选／未勾选两态，不能区分“未核验”和“未通过”，因此需要空白状态的项目应使用下拉框。
 
-**Confirm review** 将显示项目的结果写入当前标注并继续；标注成功保存后，才将这次确认的已启用、已映射且 Sync 开启的字段登记到当前 Boutlist 行。**Skip review** 继续保存标注，不产生本次核验登记；**Back** 取消继续保存。未显示的字段保留原值。核验窗口不设置保存范围；Confirm review 为默认按钮，空格可确认。
+在 Points → Verify 中按 **Confirm review**，答案立即写入当前 Boutlist 行。保存前弹出的核验窗口在结果文件保存成功后登记答案。可编辑的字段需启用 Sync 并映射到已有列。**Skip review** 继续保存，**Back** 取消保存。
 
 Display → Boutlist fields 的 **Verify review status before saving** 控制每次 Save／Save as 是否弹出一次核验窗口。关闭文件时选择保存，仍使用同一流程。关闭总开关不改写已有核验状态，Points 的 Verify 仍可手动打开窗口。
 

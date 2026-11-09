@@ -121,11 +121,9 @@ The pending Tracking box in the current frame has two diagonals `⊠` to disting
 
 ## 2.7 HUD Display
 
-HUD displays information above the image. Frame, Scale, Counts, Events, and Camera control frame numbers, the scale bar, class counts, event text, and camera keyframes/motion hints, respectively. Each type occupies its own settings row and can be enabled independently, positioned, assigned a text color with Font, given a Size, assigned an outline color with Outline, and given an Outline thickness; thickness 0 disables the outline. HUD fonts are independent of target ID fonts.
+HUD displays information above the image. Frame shows the frame number and count. Time shows the source video's elapsed time and duration in preview and export. Scale, Counts, Events, and Camera show the scale bar, class counts, event text, and camera keyframes or motion hints. Each type has independent visibility, position, font color, size, outline color, and outline thickness. Set thickness to 0 to disable the outline. HUD fonts are independent of target ID fonts.
 
 The position input format is `horizontal, vertical, priority`, for example `L, B, 2`. Horizontal values are L (left), C (center), R (right); vertical values are T (top), M (middle), B (bottom). Items at the same position are ordered by ascending priority: smaller values in T/B lie closer to the top/bottom edge; smaller values in M lie closer to the image center, with subsequent items extending above and below. Equal priorities follow settings-row order. Spacing is reserved between items; Events or Camera with no content occupy no layout position. Invalid position input reverts to the last valid value when editing ends.
-
-The default font size for Frame, Scale, Counts, and camera keyframes is 25; Events defaults to 17. Size in the Camera row controls keyframe font size; Cam beside the arrow uses 40% of that value, defaulting to 10. Scale defaults to bottom left priority 1, Frame to bottom left 2, and Events to bottom left 3; Counts defaults to bottom right 1 and Camera to bottom right 2. For example, setting Frame to `C, T, 1` displays the frame number at the top center; setting Events to `C, T, 2` displays active event text below it.
 
 Changes are previewed immediately; the HUD or All scope in Save settings saves them to settings.ini. Video export uses the same types, font sizes, colors, and outlines. Disabling Events also hides Start, End, and Capture text on the image, without clearing actual point markers or event records.
 

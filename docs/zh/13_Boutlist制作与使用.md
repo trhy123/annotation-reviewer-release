@@ -118,6 +118,8 @@ Boutlist 配置并提供有效完整 `scale_calibration` 时，可以与标注�
 
 Select bout 使用独立的非模态窗口，可通过任务栏选择，并使用系统的最小化、最大化及关闭按钮。保持表格打开时，可以在主窗口播放、拖动进度条和核对标注。
 
+当前打开的 Bout 行用浅黄色标记。单击行号选中对应行，双击列名排序。
+
 再次按下 Open Boutlist 会激活现有窗口；能够可靠识别当前 Bout 时，当前行自动居中并选中。表格排序不会改变源文件行顺序，也不会改变当前行身份。
 
 底部按钮从左到右为 Edit、↶、↷、Browse、Open。选中行并双击或按 Open 按钮将切换到主窗口并打开当前选中行对应的 Bout。选定的已经是当前打开的 Bout 时，不重新加载文件，仅切换到主窗口。非编辑状态下双击单元格也可打开该行。
@@ -169,7 +171,7 @@ Copy fill 将来源单元格的原始文本复制到目标格，包括前导零�
 
 完整 `scale_calibration` JSON 始终写入输出标注 SQLite。Boutlist fields 中可独立指定 `scale_px_per_cm` 与 `scale_calibration` 列名，二者可以同时启用。另可启用 `info_points`、`info_events` 和 `camera_anchor_keyframes` JSON 列。清空输入框只灰显项目标签，输入框保持可编辑；点击 Save settings（All 或 Boutlist fields） 后该项停止读写，不会清空表中已有内容。默认映射启用现有 Boutlist 中的同名列，其他项目为空；已保存的自定义映射优先。Points JSON 与单独标量字段并存时，非空的单独标量字段优先。加载标注 SQLite 时，元数据冲突仍通过原有对话框选择来源。
 
-核查字段在 Boutlist fields 的核查定义表中增删配置。Enabled 控制启用并在 Verify 中提问，Sync 控制与现存列同步；列名为空、未启用或未开启 Sync 时，不读取或改写相应 Boutlist 状态。核查状态仍可独立保存在结果 SQLite。配置须通过 Boutlist fields／All 范围的 Save settings 激活。
+核验字段在 Boutlist fields 的定义表中配置。Enabled 让问题出现在 Verify 中，开启 Sync 并映射到已有列后可编辑答案。答案保存在对应的 Boutlist 行。通过 Boutlist fields 或 All 范围的 Save settings 激活配置。
 
 Events、逐帧位置、模板图像和全部 History 不在此表逐项保存。多人或多个实例同时修改同一个 CSV 时，应避免互相覆盖同一记录，并以写入前差异核对为准。
 
