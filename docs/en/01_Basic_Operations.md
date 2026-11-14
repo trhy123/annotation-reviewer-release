@@ -93,15 +93,17 @@ See [Creating and Using Boutlist](13_Creating_and_Using_a_Boutlist.md) for field
 
 ### 1.3.3 Closing or Replacing Source Files
 
-The file selector in File specifies the source to operate on. Select replaces a file, while Close removes the corresponding source data from the current session; it does not delete the original file on disk. Closing a raw cache only detaches the cache association. Closing the video or using Close at the bottom, after handling unsaved-change prompts, clears this video's data, selected identities, input ranges, endpoints, events, templates, Camera anchors, staged drafts, and previews; parameter thresholds, rendering mode, and other application settings are retained. Before replacing a video or closing a session, finish uncommitted edits and handle the unsaved-result prompt.
+File → Select opens an annotation file. If annotations are already open, choose Append to add the new rows or Replace to open the selected document and its history. The source list selects which source Close removes from the current session. Close leaves the disk file intact. Closing a raw cache only detaches the cache association. Closing the video or using Close at the bottom, after handling unsaved-change prompts, clears this video's data, selected identities, input ranges, endpoints, events, templates, Camera anchors, staged drafts, and previews; parameter thresholds, rendering mode, and other application settings are retained. Before replacing a video or closing a session, finish uncommitted edits and handle the unsaved-result prompt.
 
 ### 1.3.4 Video Indexing and Image Identity
 
-When opening a video, the application builds or reads a video index in the background and numbers actual decoded images sequentially. Starting the indexing task does not mean that it completes immediately; initial indexing time depends on image count, encoding, storage speed, and processor load. An existing index cache can be reused directly when the source is unchanged and the cache remains applicable.
+The first opening scans decoded pictures in the background to build an exact frame index; progress appears in the lower-right corner. The percentage uses the estimated total until the scan finishes. The scan reads timestamps without retaining full-resolution pictures, uses hardware decoding when available, and falls back to software decoding. An unchanged video reuses its saved index on later openings.
 
-Existing annotations use frame numbers in decoding order; not every row needs to store a temporary image reference. Temporary references record the actual images associated with edits before index reconciliation is complete; an empty reference does not indicate that the frame has not been indexed. When the video contains timestamp gaps, the application reconciles relevant edits through image identity rather than inserting fictitious frames according to gap duration.
+Index caches live under `AnnotationReviewerGUI/pts/` in the system temporary directory. They contain PTS and keyframe lists, not video images. A reusable cache avoids a new scan and its progress indicator.
 
-Save / Save as waits for unfinished indexing and edit reconciliation. Saving continues after completion; if indexing fails or image identity cannot be uniquely confirmed, edits are retained and the reason is reported. If the annotation file is replaced while waiting, queued save and Boutlist synchronization requests for the original file no longer apply to the new file.
+Playback, seeking, thumbnails, and annotation-table browsing remain available during indexing. Annotation overlays and HUD appear as soon as the displayed picture has a confirmed image number. An unverified picture hides them and shows “Unconfirmed” at the top center, even with HUD disabled. Editing, Tracking, saving, and export wait for the complete index. Annotation loading and indexing run in separate background tasks; when a companion video can be identified before reading a large annotation file, indexing starts first so both tasks overlap. If indexing fails, check Display → Decoder and click **Retry indexing** beside the progress indicator. Closing or replacing the video cancels its unfinished scans.
+
+Existing annotations retain their decoded-image numbers. Recovery data containing temporary image references is reconciled before editing is enabled; timestamp gaps do not create fictitious annotation frames. Any queued save or Boutlist synchronization remains tied to its original annotation document and is discarded if that document is replaced.
 
 Indexing uses the actual number of decodable images rather than treating the container packet count as the frame count. When timestamp-based seeking is unreliable, decoding starts from the beginning of the video and counts images. See [Undo and Recovery](12_Undo_and_Recovery.md#1253-saving-before-image-identity-verification-is-complete) for result verification and recovery procedures.
 
@@ -109,7 +111,7 @@ Indexing uses the actual number of decodable images rather than treating the con
 
 **Review queue** is positioned on the right of the window. Its default requested width is defined only by `DEFAULT_QUEUE_WIDTH` in `ui/review_queue.py`; it can be widened by dragging, floated, or closed. Actual width is also constrained by button text and available window space. It occupies the available width of the video area; **Right panel W** for the parameter panel is set independently in pixels and is not limited to a percentage of the main window width.
 
-The top table lists all verification entries, showing **Bout ID, Frames, Kind, Reason, Status, Phase, IDs, Annotation file, Video file** in order. The entire current row is highlighted. Clicking another row loads files, seeks to the start frame, selects relevant IDs, sets the shared Range to the verification segment, and disables All IDs / All frames. In a narrow window, scroll horizontally to view later columns, or hover to view full contents. Detailed information about the current entry appears below the table, with buttons fixed at the bottom; drag the divider between the table and details to adjust their sizes.
+The top table lists **Bout ID, Frames, Kind, Reason, Status, Phase, IDs, Annotation file, Video file**. The open entry is pale yellow, matching Select Bout. Single-click to select a row. Double-click to open it, seek to the start frame, select the relevant IDs, set Range, and clear All IDs / All frames. In a narrow window, scroll horizontally or hover over a cell to read its full contents. The details below the table describe the open entry. Drag the divider to resize the table and details.
 
 Buttons, titles, column names, built-in statuses, and phases use the language selected in Display → Others → Language, which applies immediately without reopening the document; save Others or All to keep the choice for the next run. English is the default. User-entered kinds and reasons remain in their original language. CSV `status` continues to use the stable internal values `pending`, `normal`, and `corrected`, displayed in English as Pending, Normal, and Fixed, and in Chinese as “待核验”, “正常”, and “已修正”.
 
@@ -128,7 +130,17 @@ For example, from the current source project root, run the following to open the
 python -m app.launch --review-queue "../review_examples/review_examples.csv"
 ```
 
-A full path can also be specified, for example `--review-queue "E:\实验课题-王天一\胡蜂的诱捕行为\胡蜂蜜蜂实时距离\模型与检测程序\annotation_reviewer_gui\review_examples\review_examples.csv"`. The panel displays all entries; click rows or use Prev / Next to verify them individually. Normal / Fixed / Pending writes statuses back to this list. The removed scripts were dedicated scripts tied to specific experimental paths; the general startup script and list interface remain available. Opening an entry does not itself modify annotations.
+A full path can also be specified, for example `--review-queue "E:\annotation_reviewer_gui\review_examples\review_examples.csv"`. Double-click an entry or use Prev / Next to open it.
+
+**Review with a Boutlist**
+
+```text
+Reviewer --review-queue "data/review_queue.csv" --boutlist "data/field_boutlist.csv"
+```
+
+Reviewer treats the specified Boutlist as open and matches each queue entry to a unique row using its bout ID. The queue can omit `detection_file` when the matched Boutlist row provides it. If both tables specify a file, the paths must resolve to the same annotation. Unmatched entries and file conflicts are disabled in gray. Hover over the row for the reason.
+
+**Save** writes the target SQLite and synchronizes changed Points fields such as Capture, Victim and nest coordinates to the mapped Boutlist columns. **Verify** writes the enabled, mapped verification fields with Sync turned on. With `--review-queue` alone, the queue supplies the annotation path and saves its own entry statuses. Boutlist synchronization requires an explicit `--boutlist`.
 
 Placing `review_queue.csv` in the source root or alongside the executable also enables it automatically at startup. Explicit arguments take priority; this window is not shown when neither a file nor arguments are present. Indices start at 0. On macOS, the default list location is the application's writable data directory.
 
@@ -148,20 +160,21 @@ Reviewer --annotation "data/annotations.sqlite" --video "data/video.mp4" --trk "
 | `--manual-track PATH` / `--trk PATH` | Opens manual trajectories |
 | `--raw-cache PATH` | Mounts a raw detection cache |
 | `--review-queue PATH` | Opens the complete review queue; cannot be combined with direct file arguments |
+| `--boutlist PATH` | Opens and binds the specified Boutlist for queue or direct-target review |
 | `--review-index N` | Initial list entry, with indices starting at 0 |
 | `--review` | Creates a single-target verification panel for directly specified annotations |
 | `--start N` / `--start-frame N` | Start frame; defaults to 1 |
 | `--end N` / `--end-frame N` | End frame; defaults to the start frame |
 | `--ids TEXT` | Selects target IDs; enclose multiple IDs in the same pair of quotes |
 
-- **Prev / Next**: Switches entries; the table can also be clicked directly.
+- **Prev / Next** opens the previous or next available entry. Double-click a row to open it directly.
 - **Start / End**: Seeks to the current segment's start/end frame. Playback and frame stepping still use the original Reviewer controls.
-- **Normal / Fixed / Pending**: Writes the verification result to the list CSV and moves to the next entry. These buttons do not automatically modify annotations. **Fixed** requires unsaved annotation edits to be saved first.
+- **Normal / Fixed / Pending** writes the open entry's status to the queue CSV and keeps the same entry and frame. Save any annotation edits before marking **Fixed**.
 - Switching annotation files retains the normal save prompt; canceling the switch keeps the original entry selected in the table.
 
 **CSV Format and Programmatic Calls**
 
-The required field is `detection_file` (`annotation_file` is also supported). Common fields are:
+A standalone queue needs `detection_file` (`annotation_file` is also supported). With a Boutlist, an entry can supply a bout ID and use the annotation path from its matched row.
 
 | Field | Contents |
 |---|---|
@@ -179,7 +192,7 @@ Call from an already running Reviewer main window (must run on the GUI thread):
 
 ```python
 from app.review_launch import open_review_queue
-dock = open_review_queue(window, queue_path, index=0)
+dock = open_review_queue(window, queue_path, index=0, boutlist=boutlist_path)
 ```
 
 This interface replaces any existing verification window while retaining normal annotation loading, saving, and undo functionality. External analysis programs can invoke it through startup parameters without copying experimental analysis code into Reviewer. The source entry point, automatically discovered lists, and compiled entry point share the same module.

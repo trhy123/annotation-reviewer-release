@@ -127,6 +127,8 @@ Actual GPU use is determined by worker device detection and runtime information.
 
 Open Batch and use Add videos to add inputs; for Replay, select the corresponding raw caches. Set a common output directory or Output beside video, specify a concurrency limit or Auto, then click Start processing. Delay moves selected pending items to the queue tail, and Pause/Stop controls selected tasks; with nothing selected, operations apply to the corresponding entire queue. Each task reads settings when it actually starts; running tasks do not switch parameters live.
 
+Auto treats Jobs as an upper limit. It starts one unmeasured job and waits for two batches and at least two seconds of progress before admitting another. Measured peak RAM and selected-device GPU memory receive a 25% allowance plus a system reserve; each subsequent model is warmed up separately. Resource probes run in the background. Missing GPU measurements keep jobs serial rather than using another GPU's free memory. GPU OOM halves inference Batch and retries the same frames in order; later batches and new Auto jobs use the reduced limit. Batch=1 or model-loading OOM is reported as a failure; admission control cannot recover a driver reset or guarantee memory against unrelated applications.
+
 Concurrency adds video memory, memory, and disk requirements; validate with a few videos first. A failed task must not be treated as a complete detection result; check every task's status and output directory. Removal removes an item from the list and does not delete the original video.
 
 ## 3.9 Interpreting Results

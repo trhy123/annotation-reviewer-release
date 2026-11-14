@@ -4,7 +4,11 @@
 
 ## 10.1 Purpose and Coordinates
 
-Camera estimates relative background motion and maps images and annotations to stabilized display coordinates. Original video boxes remain stored in source-image pixels; do not write screen coordinates from the stabilized canvas directly to CSV. Expanded motion canvas extends the display area to accommodate transformed images; blank regions do not represent new image content available for annotation.
+Camera estimates relative background motion and maps the current image and its annotations to stabilized display coordinates using the same transformation. Expanded motion canvas enlarges that canvas to accommodate transformed images for continuous inspection of the background and targets.
+
+Object boxes remain stored in source-image pixels for each frame. Canvas display, picking, and editing are mapped back to those coordinates before writing data. Filled regions outside the source image contain no additional video content; their screen coordinates are not source-image coordinates.
+
+Hive/Axis and Scale record their placement frames and follow the corresponding background through the Camera transformation: they move with the background in normal view and stay fixed relative to it in the expanded canvas. See [9.9 Coordinate Origin and 9.10 Camera Motion](09_Scale_Operations.md#99-metric-grid-and-coordinate-origin) for setup and checks.
 
 ## 10.2 Manual Anchor Procedure
 
@@ -64,9 +68,9 @@ Camera keyframes and toggles are session metadata. Disabling Enable retains anch
 | Control | Meaning |
 | --- | --- |
 | Enable | Applies camera compensation; disabling it does not clear existing keyframes |
-| Anchor | Displays background anchor markers |
+| Anchor | Checked shows anchor points and timeline `+` marks on all pages. Half checked (default) shows points on all pages and `+` only in Camera. Unchecked hides the points and keeps `+` in Camera. Image points require Enable. |
 | HUD / HUD scale | Enables camera information and adjusts its text size; uses the same toggle as Display → HUD → Camera |
-| Threshold | Pixel threshold for recording camera displacement updates |
+| Threshold | Source-pixel threshold for HUD movement, Estimate keyframe sampling, and robust fitting. Click to confirm cleanup of redundant low-movement anchor samples. Default is 1 px. |
 | Number of anchors | Number of anchor slots used to describe camera motion |
 | Set anchor | Selects the anchor slot currently being operated on |
 | Lock | Locks the corresponding anchor interaction state to prevent accidental changes |

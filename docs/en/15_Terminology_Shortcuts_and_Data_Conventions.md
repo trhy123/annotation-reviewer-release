@@ -63,8 +63,8 @@
 | Ctrl + Z | Local undo during active editing or undo of committed History; focused text takes priority for text undo; Boutlist editing uses independent cell undo |
 | Ctrl + Y | Local redo during active editing or redo of committed History; focused text takes priority for text redo; Boutlist editing uses independent cell redo |
 | Alt + C | Changes selected targets to the next class cyclically, following class editing scope and confirmation rules |
-| M | On Edit's ID tab, enters the active ID as Merge target; if a target exists, appends it to the source set |
-| N | On Edit's ID tab, removes selected active IDs present in the current frame from Merge Source; does not merge |
+| M | On any Edit subpage, enters the active ID as Merge target; if a target exists, appends it to the source set |
+| N | On any Edit subpage, removes selected active IDs present in the current frame from Merge Source; does not merge |
 | Alt + L | Cycles through the interface languages in list order |
 | Alt + left-click | Immediately marks the current frame manually in the image, retaining the session, Track ID, and templates; releasing Alt does not commit the segment |
 | Alt + Shift + left-click | Selects a template in the image and switches to Track Motion; Run Auto is then started manually |

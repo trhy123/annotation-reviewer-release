@@ -12,14 +12,14 @@ Calibration objects should lie in the same, or approximately the same, measureme
 
 ## 9.2 Interface and States
 
-Open Edit → Scale. Calibration bars are mainly displayed on the Scale and Camera tabs; hiding them by switching tabs does not delete their data.
+Open Edit → Scale to see the calibration bars.
 
 | Control | Behavior |
 | --- | --- |
 | Scale (px/cm) | Displays a summary outside editing mode: a single value for uniform scale or a range for variable scale |
 | Changes / Apply | Starts a calibration transaction; clicking Apply again commits all changes as one History operation |
 | Add bar | Adds a calibration bar within the transaction, without a default real-world length |
-| Condition | Shows numerical conditioning; hover to view fit and cross-validation diagnostics |
+| Condition | Shows numerical conditioning; hover for fit and cross-validation diagnostics and each bar’s placement frame |
 | Scale metric | Shows whether absolute length is available and the constraint rank for affine/homography models |
 | Inputs / Need | Summarizes the numbers of lines, lengths, and angles, and the constraints still required |
 
@@ -43,6 +43,8 @@ For example, if a known 5 cm length occupies 150 px in the image, the scale is 3
 3. Click an endpoint to select it, then specify its correct position; follow the canvas interaction prompts to move it onto a ruler or known marker.
 4. Position the other endpoint in the same way. Zooming in helps with precise point placement.
 5. Right-click a segment to add an intermediate point representing measurable subdivisions.
+
+Place a bar at any frame, before or after adding Camera anchors. The application records source-image coordinates, a coordinate reference frame, and the actual placement/edit frame. Multiple bars are mapped to the first bar’s reference frame for calibration, normally without rebasing to video frame 1. To rebase a single bar to frame 1, use **Changes → Pin bar → Apply**. Its actual placement frame is retained and appears in the **Condition** tooltip.
 
 Calibration bars use straight-line geometry. Intermediate points subdivide a line; do not treat a curved object contour as a single straight ruler. After moving endpoints, check that intermediate points and segments still correspond to the real markers.
 
@@ -95,7 +97,7 @@ Model selection favors the simpler model sufficient to explain the data. Constra
 | Abs | Whether an absolute length reference in centimeters is available |
 | Affine r/3 | Independent constraint rank for the affine metric, not a line count |
 | Homography r/5 | Independent constraint rank for the projective metric |
-| Condition | Stability of the current constraint geometry |
+| Condition | Stability of the current constraint geometry; hover to see each bar’s actual placement frame |
 | Fit RMS / Max residual | Fitting error for entered lengths or angles |
 | CV length error | Held-out length validation when calculable; may be N/A without redundancy |
 
@@ -117,13 +119,21 @@ For variable calibration, dividing all pixel distances by the summary scale in s
 
 Metric grid maps centimeter spacing back to the image for inspection. A Uniform grid is approximately evenly spaced; projective calibration may produce convergence or uneven spacing; a local field grid represents approximate measurement. Grid anchor selects the grid reference position, while the Axis/Hive origin does not change entered lengths or real-world angles.
 
-Compare the grid with real markers not used for fitting. Visual regularity is not evidence of accuracy. If lines are too dense, increase physical spacing or reduce display density rather than changing real-world lengths to reduce the number of grid lines.
+Hive/Axis can be placed at any frame, before or after adding Camera anchors. It stores source-image coordinates and the actual placement frame. With Camera enabled, the origin is mapped from its placement frame to the current frame. Hover over the Hive value button to see `x, y (Frame=n)`. Older data without a placement frame shows `Frame=?`; placing the origin again at a known frame records it.
+
+Compare the grid with real markers not used for fitting. Visual regularity is not evidence of accuracy. If lines are too dense, increase physical spacing or reduce display density rather than changing real-world lengths to reduce the number of grid lines. Screen zoom and pan change the view, not the calibration values.
 
 ## 9.10 Camera and Expanded motion canvas
 
-Calibration retains its coordinate space. Calibration on a normal image uses original image space; calibration created in an expanded stabilized canvas uses the corresponding stabilized canvas space. It is transformed to the current frame for display, preventing view zoom or camera compensation from being treated as a new measurement scale.
+Camera uses background anchors to map positions between frames. Expanded motion canvas places the transformed images on a common canvas so that the background stays stable. Scale then converts image distances to centimeters. Calibration bars, the coordinate origin, and target annotations therefore need to use the same Camera transformation.
 
-Temporarily disabling Camera does not rewrite existing stabilized-canvas calibration as original-image calibration. If a required transformation is unavailable, restore the correct Camera state before editing rather than guessing the conversion. With substantial camera zoom, changes in depth of field, or targets leaving the original measurement plane, reassess whether a fixed calibration remains applicable.
+On the normal image, bars, the origin, and the metric matrix follow the corresponding background. In Expanded motion canvas they remain fixed relative to the stabilized background. Switching views does not require recalibration or rewrite source coordinates and real lengths. Temporarily disabling Camera retains the calibration. If an older canvas-space calibration lacks the required transformation, restore the correct Camera state before editing it.
+
+For a practical setup, choose fixed background anchors on the calibration plane, verify compensation, and then place bars and enter known lengths. Anchors can also be added after placing the bars. Check the beginning, middle, and end of the clip: each bar should stay on the same reference object. Verify scale against a known length not used for fitting; a stable background alone does not establish accurate centimeter measurements.
+
+Bars may be placed at any frame, before or after adding anchors. Moving a bar endpoint or intermediate point and applying updates that bar’s actual placement frame. Browsing frames or applying without changes does not update it. The coordinate reference frame is stored separately, so bars can share a coordinate reference while retaining their individual placement frames.
+
+Whether planar perspective changes can be compensated depends on anchor geometry and the Camera model. Different planes for calibration and targets, changes in target height, occlusion, and registration errors can still bias measurements. Fixing the canvas does not remove those errors. Recheck calibration coverage after substantial changes in viewpoint or zoom.
 
 ## 9.11 Typical Examples
 

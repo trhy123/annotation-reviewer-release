@@ -54,25 +54,25 @@ Cross-check table rows, timeline bands, and canvas diagnostic layers: the appear
 
 ## 2.5 Progress Bar, Bands, and Hovering
 
-The current progress position is used for playback/frame stepping. Yellow identity bands indicate the appearance ranges of selected identities; gaps correspond to continuous segments in the table. Each identity's yellow band has opacity 0.6, so overlapping portions where multiple selected identities coexist appear darker.
+The current progress position is used for playback/frame stepping. One selected identity uses a yellow band; two or more use their assigned identity colors, with brightness adjusted for visibility against the theme. Each band retains opacity 0.6, so coexisting portions blend. Bands follow actual kept frame ranges, including both endpoints. Very short segments, gaps, and overlaps are widened just enough to remain visible; red overlaps have a wider minimum. Consecutive segments with no missing frame join without a gap. These display adjustments do not change frame ranges or seeking targets.
 
 | Type | When Enabled | Band Appearance and Purpose |
 | --- | --- | --- |
-| Selected ID | Global | Thin yellow bands indicating selected identities' appearance ranges, with gaps corresponding to track interruptions |
+| Selected ID | Global | One identity yellow; multiple identities use their assigned colors, all at opacity 0.6; gaps correspond to trajectory breaks |
 | Change position | Box page or continuous editing session | Green, indicating frame segments added/staged in this operation |
 | Tracking | Tracking page | Added range in green; Delete selection range in black, portions with actual annotations pending deletion in red; original identity range remains yellow |
-| Merge ID | ID page | Target blue, Source green, same-frame overlap red; Find candidates use opaque cyclic-color bands underneath, with candidate ID numbers in identity colors. When both coexist, original Merge bands are above with opacity 0.67, and red overlap bands are drawn last |
+| Merge ID | ID page | Target blue, Source green, each labeled with its ID; same-frame overlap red, counting kept annotations only. Find candidates use opaque cyclic-color bands underneath, with candidate ID numbers in identity colors. When both coexist, original Merge bands are above with opacity 0.67, and red overlap bands are drawn last |
 | Staged record | Staging window open with a record selected | Black at opacity 0.3, indicating that record's staged range; updates when another record is selected |
 | Swap preview | Swap page | Changed orange; Position Uncertain purple; uncertain frames are skipped by default on commitment |
 | Trajectory | Trajectory page | Orange, indicating the currently editable trajectory range, matching Preview colors |
 | Match comparison | Match page | Automatic annotations pale blue, manual trajectories pale green, overlap pale red; compares the appearance ranges of both sources |
 | Binding candidates | Single manual identity selected or binding bands set to always display | Cyclic-color bands numbered by binding segment; adjacent segments in the same group are not numbered repeatedly |
 | Binding verification | Single manual identity selected or binding bands set to always display | Confirmed bright green, Confirmed · Modified dark green, Stale / Conflict red; above candidate bands |
-| Events | Events page | Uses the colors and band rows configured per type in Event types; no band is drawn when Band is off |
+| Events | Events tab | Configured type color and Band row; alpha 0.7. Smaller Priority draws on top; selected events have a contrast outline. Band 0 hides the strip |
 | Video export time range | File page | Red, indicating Export Range; the current video's preview range remains after Export settings closes |
 | Detection postprocessing preview | During Raw / Postprocess preview | Raw coverage blue, postprocessed result range green, manually modified frames brown-red, completed computation pale green; selected range yellow |
 
-Merge Target / Source inputs in Edit → ID also immediately add thick blue/green outlines to the corresponding boxes, hidden after switching to another subpage. The candidate result window centers on the current frame, using yellow numbered cells or gap lines for positioning; changing frames retains the manual single or multiple selection. Row backgrounds and candidate bands use cyclic colors, while candidate ID numbers in the table and beside bands use assigned identity colors. Only checked Use boxes determine which candidates populate Source; selection or navigation does not mean a merge has occurred.
+Merge Target / Source inputs immediately add thick blue/green outlines to the corresponding boxes throughout all Edit subpages; the outlines hide when leaving Edit. The candidate result window centers on the current frame, using yellow numbered cells or gap lines for positioning; changing frames retains the manual single or multiple selection. Row backgrounds and candidate bands use cyclic colors, while candidate ID numbers in the table and beside bands use assigned identity colors. Only checked Use boxes determine which candidates populate Source; selection or navigation does not mean a merge has occurred.
 
 All text and point markers are drawn above all bands; text retains the relative layer ordering of its corresponding bands. Staging bands indicate only the selected draft's range; they do not automatically become the shared Range or modify data. Different purposes may occupy different heights; interpret them using the current page, numerical labels, and the table above.
 

@@ -83,7 +83,7 @@ bee_slip records event timing without requiring a persistent honeybee ID. Events
 1. Click Types in Edit → Events to open the nonmodal type table.
 2. Use Add to create a definition and Delete to remove selected definitions; Up/Down moves selected definitions to change dropdown order. Internal key is a stable storage identifier: it must begin with a letter, contain only letters, digits, and underscores, and be unique.
 3. Enabled controls whether new events of this type can be added and whether its HUD/strip is displayed; Name controls its label in the dropdown, event table, and HUD. Tip is an editable, INI-backed description shown on type choices and event cells, exactly as entered. Double-click Color to choose a color; the table stores a hexadecimal `#RRGGBB` code applied to the event table and strip.
-4. Band 0 hides this type's strip; 1, 2, and 3 use the three strip rows below the progress bar respectively. Hiding a strip does not delete events or disable HUD display.
+4. Band 0 hides this type's strip; 1, 2, and 3 use the three strip rows below the progress bar respectively. Hiding a strip does not delete events or disable HUD display. Priority controls overlap order: smaller integers draw on top, defaulting to the type's sequence number. Event strips use alpha 0.7.
 5. Valid changes immediately preview names, colors, and strips. Close accepts changes for the current run without writing to INI; Cancel or the window × discards changes since opening and restores the previous display. To retain changes for later runs, click Save settings, or save with Event types/All selected in Display's save scope; after a successful save, Cancel discards only subsequent unsaved changes.
 
 Changing names and colors does not change stored event identifiers or frame intervals. Disabling or deleting type definitions does not delete existing events. Renaming Internal key does not migrate events under the old identifier; explicitly change their types in the event table. Existing events not configured on this computer are retained; type definitions in result files can supply display names and colors. Type configuration is an application setting outside annotation History; event interval changes still enter History.
@@ -97,7 +97,7 @@ Changing names and colors does not change stored event identifiers or frame inte
 1. Select a type in the event type dropdown and clear any existing event selection.
 2. Navigate to the start frame and click Start; a new event is initially created with start=end and selected.
 3. Navigate to the end frame and click End; the event becomes an interval including both endpoints, and selection is cleared afterward.
-4. Click the event in the table to inspect its range; play around the interval to verify its boundaries.
+4. Double-click the event in the table to navigate to its interval; play around it to verify the boundaries.
 
 With no event selected, clicking either Start or End creates a point event at the current frame. Single-frame events use start=end and share the interval structure, for example `{"type":"bee_slip","start":2301,"end":2301}`.
 
@@ -105,9 +105,9 @@ Conspecific interference, pressure from other hornets, and loss_or_blur interval
 
 ### 11.6.2 Editing an Existing Event
 
-Click an event column to select it, then change the type dropdown to update its type; navigate to a new boundary frame and use Start/End to update the selected event. Double-click the corresponding table content to edit the type or range. With multiple events selected, boundary or type changes may affect all selected events; verify selection before proceeding.
+Click an event column to select it; clicking it again clears that selection without navigating. Ctrl/Shift support multiple selections. Change the type dropdown to update selected events, or navigate to a boundary frame and use Start/End. Use F2 to edit a table cell directly. With multiple events selected, boundary or type changes may affect all selected events; verify selection before proceeding.
 
-Each event occupies one table column; events containing the current frame are highlighted. Clicking selects and navigates; column position does not indicate event priority. Delete removes selected event records, not trajectory boxes or the original video.
+Each event occupies one table column; events containing the current frame are bold. Selected cells have a yellow background and the selected event(s) are centered; moving the timeline does not recenter away from a selection. Esc or a click on a column/row header clears selection. Double-click to jump to the nearest frame within the interval. Selected events' timeline strips have a thin contrast outline. The horizontal scrollbar stays visible, and the mouse wheel scrolls horizontally. Type Priority determines strip layering. Delete removes selected event records, not trajectory boxes or the original video. Event edits record changed interval(s) in History → Frames and the new type or old → new type in Details; unchanged events are excluded from this summary.
 
 ## 11.7 Verify and Save Verification
 

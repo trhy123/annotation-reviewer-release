@@ -51,6 +51,8 @@ $$
 
 Here, `sign=-1` when `trk_reverse=True`.
 
+Changing video Capture shifts an existing Tracker calibration reference by the Capture difference multiplied by the trk/video FPS ratio; reversed changes the sign. Prepared manual points keep their alignment. The reference may be fractional or outside the sampled source range; blank means unset. Undo/redo restores both references together. With equal frame rates, the reference changes by the same number of frames.
+
 ### 7.3.1 Parameter table
 
 | Interface item | Meaning and units |

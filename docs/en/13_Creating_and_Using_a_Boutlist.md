@@ -31,12 +31,12 @@ Relative paths are resolved first against the application directory; if unavaila
 
 ## 13.3 Boutlist fields Mapping Settings
 
-These settings are in Display between Playback and Others. Items on the left represent internal application meanings; enter actual Boutlist column names in the text fields.
+Display → Boutlist fields contains two editing buttons and enabled-item summaries. **Edit sync fields** opens a narrow, vertically scrolling table with Internal field, Enabled/Sync, Boutlist field, and Tip columns. Tip stores the project-specific explanation. **Edit review fields** opens a wider table for review questions and answer controls. Verify review status before saving stays in the main group.
 
 - Column names match exactly, including case; leading and trailing whitespace in input is removed.
-- A blank value disables reading and write-back for that item.
-- Two items cannot map to the same nonempty column name; Save settings (All or Boutlist fields) rejects duplicate mappings.
-- Column name fields contain drafts. Mappings are written to `settings.ini` and take effect in the current session only after selecting All or Boutlist fields as the scope and clicking Save settings. Saving other groups does not apply these drafts.
+- Uncheck Enabled/Sync or delete the row to stop reading and write-back. Disabling preserves its column name and Tip; existing CSV columns and values remain unchanged. An enabled row requires a column name; otherwise Save settings asks you to correct it.
+- Two enabled fields cannot map to the same nonempty column name. Add/Delete changes the list; Up/Down moves the current row. New internal names must correspond to existing annotation metadata; naming a field does not calculate a new value.
+- Each window has its own **Save settings** button: it saves and activates only that window's definitions, without applying or validating the other window's drafts. Closing either window discards its unsaved edits and restores its last saved definitions. The Display save bar with scope All or Boutlist fields saves both definition tables plus the outer controls. Sync rows are stored under `boutlist_sync/`; review definitions remain under `verify_types/`.
 - Opening or writing back to Boutlist before saving continues to use the last saved mappings. Restoring saved values automatically clears the unsaved indicator.
 - Changing a mapping does not directly rename or rewrite CSV columns.
 - The Open Boutlist selection window displays original CSV column names and order, including unmapped custom columns; internal canonical fields are used only for reading and write-back and are not displayed as duplicates. `column_widths` in `setting.ini` controls column widths only, not column order.
@@ -66,6 +66,7 @@ These settings are in Display between Playback and Others. Items on the left rep
 | analysis_start_frame / analysis_end_frame | Video analysis range including both endpoints |
 | capture_frame | Successful capture reference frame |
 | nest_x_px / nest_y_px | Hive entrance pixel coordinate summary corresponding to Hive information in the application |
+| hive_reference_frame | Actual Hive/Axis origin placement frame |
 | scale_px_per_cm | Brief representative px/cm value |
 | victim_id_at_capture / captor_id_at_capture | Verified identities of the captured honeybee and successful hornet |
 | left_censored | Actual interaction onset precedes the available analysis images |
@@ -169,9 +170,9 @@ Disk contents are checked before writing to prevent overwriting other programs' 
 
 Write-back updates only corresponding mapped fields, leaving other columns and unmodified cell text unchanged; for example, updating Capture should not reformat identifier `001` or a custom column value `1.2300` throughout the table.
 
-Complete `scale_calibration` JSON is always written to output annotation SQLite. Boutlist fields allows independent column names for `scale_px_per_cm` and `scale_calibration`, both of which can be enabled together. JSON columns for `info_points`, `info_events`, and `camera_anchor_keyframes` can also be enabled. Clearing a field only grays out its item label; the input remains editable. After Save settings (All or Boutlist fields), reading and writing stop for that item without clearing existing table content. Default mappings enable same-named columns present in the current Boutlist and leave other items blank; saved custom mappings take precedence. If Points JSON and separate scalar fields coexist, nonempty separate scalar fields take precedence. Loading annotation SQLite still uses the existing source-selection dialog for metadata conflicts.
+Complete `scale_calibration` JSON is always written to output annotation SQLite. Boutlist fields allows independent column names for `scale_px_per_cm` and `scale_calibration`, both of which can be enabled together. JSON columns for `info_points`, `info_events`, and `camera_anchor_keyframes` can also be enabled. In Edit sync fields, uncheck Enabled/Sync and save to stop reading and writing an item while retaining its column name and Tip. Default rows follow the Boutlist’s identity, video, analysis, location, source, alignment, and notes fields; saved custom ordering and mappings take precedence. If Points JSON and separate scalar fields coexist, nonempty separate scalar fields take precedence. Loading annotation SQLite still uses the existing source-selection dialog for metadata conflicts.
 
-Configure review fields in the Boutlist fields review definition table. Enabled shows the question in Verify. Sync and an existing mapped column make the answer editable. Review answers are stored in the corresponding Boutlist row. Activate configuration through Save settings with the Boutlist fields or All scope.
+Configure review fields through Boutlist fields → Edit review fields. Enabled shows the question in Verify. Sync requires a mapped Boutlist column. Review answers are stored in the corresponding Boutlist row. The window’s Save settings activates only review definitions; it does not save sync-field drafts or the outer before-saving switch.
 
 Events, frame-by-frame positions, template images, and complete History are not stored individually in this table. When multiple people or instances edit the same CSV, avoid overwriting the same records and rely on pre-write difference checks.
 

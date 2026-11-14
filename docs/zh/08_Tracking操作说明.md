@@ -163,8 +163,9 @@ Tracking 包含顶部公共区域和四个子页：`Track Motion`、`Templates`�
 | Score ≥% | 85，允许 0–100 | Guard template updates 下的学习分数门槛；不代替 Track Motion 的位置接受阈值 |
 | Margin ≥% | 10，允许 0–100 | Guard template updates 下的学习竞争分差门槛，以百分点表示 |
 | Reliable matches | 3，允许 1–100 | 同一模板连续赢得指定次数可靠匹配后允许更新；不延迟记录已接受位置 |
+| Preview every | 1，允许 1–999 帧 | 每 N 个追踪帧刷新一次画面，可尝试 4；匹配、模板更新和结果仍逐帧处理。暂停、失配、结束及手工操作保持立即刷新；Mouse guided 松开鼠标时立即显示已处理帧 |
 
-Advanced 参数改变时暂停 Auto，使在途旧结果失效，保留模板与待提交点。候选策略、预算或颜色方式改变后，重新建立权重标定依据；当前帧与已确认目标位置一致时自动请求重新标定，否则应在可靠目标位置使用 Recalculate 或 Add Template。数值门槛改变不重新改写此前接受点。参数偏好按 `tracking/` 键保存在 `settings.ini`。
+Preview every 在运行中立即生效并保存到 `tracking/preview_stride`，不暂停或改变匹配参数；手动切帧仍使用所选目标帧。其他 Advanced 参数改变时暂停 Auto，使在途旧结果失效，保留模板与待提交点。候选策略、预算或颜色方式改变后，重新建立权重标定依据；当前帧与已确认目标位置一致时自动请求重新标定，否则应在可靠目标位置使用 Recalculate 或 Add Template。数值门槛改变不重新改写此前接受点。参数偏好按 `tracking/` 键保存在 `settings.ini`。
 
 **比较规程：** 固定视频区间、模板及位置接受阈值，以 Combined／12／Mean 为基线，再比较 Multi-channel／24。记录错误目标、暂停与实际识别速率，确认候选增加的收益；随后单独比较 HSV histogram。颜色分布可能帮助区分平均颜色相近的目标与背景，小模板或变化的外观也可能产生噪声，不能仅依据分数升高判断效果。
 

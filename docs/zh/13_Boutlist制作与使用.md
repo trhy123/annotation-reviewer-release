@@ -31,12 +31,12 @@ trial02,E:/videos/clip02.MP4,,1,950,930
 
 ## 13.3 Boutlist fields 映射设置
 
-设置位于 Display 中 Playback 与 Others 之间。左侧项目代表程序内部含义，文本框填写 Boutlist 中的实际列名。
+Display → Boutlist fields 仅保留两个编辑入口、启用数量摘要及公共控件。**Edit sync fields（编辑同步字段）** 打开较窄的纵向滚动表格，四列为内部字段、启用/同步、Boutlist 列名及说明（Tip）；**Edit review fields（编辑核验内容）** 打开较宽的核验定义表。Verify review status before saving 总开关仍在主界面。
 
 - 按列名精确匹配，包括大小写；输入值两端空白会被去除。
-- 留空表示停用该项目的读取和回写。
-- 两个项目不能指向同一个非空列名；Save settings（All 或 Boutlist fields） 会阻止重复映射。
-- 列名输入框为草稿。只有范围选为 All 或 Boutlist fields 并点击 Save settings 后，映射才写入 `settings.ini`，并从本次会话开始生效。保存其他分组不会应用这组草稿。
+- 取消“启用/同步”或删除行，可停用该字段的读取和回写，不删除 CSV 已有列或数值。停用会保留列名及说明；启用行必须填写列名，否则保存时提示修正。
+- 两个启用字段不能指向同一个非空列名。Add／Delete 增删行，Up／Down 移动当前行。新增内部字段须对应已有标注元数据键，不会凭名称计算新值。
+- 两个窗口各自的 **Save settings** 只保存并启用本窗口定义，不应用或校验另一个窗口的草稿。关闭任一窗口会放弃未保存修改，恢复为该窗口上次保存的定义。Display 最底部选择 All 或 Boutlist fields 保存时，同时保存两张表及外部公共控件。同步定义写入 `boutlist_sync/`，核验定义仍写入 `verify_types/`。
 - 未保存时打开或回写 Boutlist，继续使用上一次保存的映射。恢复为已保存值后，未保存提示自动消失。
 - 改映射不会直接重命名或重写 CSV 列。
 - Open Boutlist 选择窗口按 CSV 原始列名和原始列顺序显示，包括未映射的自定义列；内部规范字段只用于读取和回写，不额外显示一份。`setting.ini` 中的 `column_widths` 仅控制列宽，不控制列顺序。
@@ -66,6 +66,7 @@ trial02,E:/videos/clip02.MP4,,1,950,930
 | analysis_start_frame / analysis_end_frame | 包含两端的视频分析范围 |
 | capture_frame | 成功捕获参考帧 |
 | nest_x_px / nest_y_px | 巢门口像素坐标摘要，与程序的 Hive 信息对应 |
+| hive_reference_frame | Hive／Axis 原点实际放置帧 |
 | scale_px_per_cm | 简短的代表性 px/cm |
 | victim_id_at_capture / captor_id_at_capture | 被捕蜜蜂与得手胡蜂的已核对身份 |
 | left_censored | 真实互动起点早于可用分析画面 |
@@ -169,9 +170,9 @@ Copy fill 将来源单元格的原始文本复制到目标格，包括前导零�
 
 回写只更新相应映射字段，其他列和未修改单元格的文本保持原样，例如标识 `001` 和自定义列 `1.2300` 不应因为更新 Capture 而被整体重新格式化。
 
-完整 `scale_calibration` JSON 始终写入输出标注 SQLite。Boutlist fields 中可独立指定 `scale_px_per_cm` 与 `scale_calibration` 列名，二者可以同时启用。另可启用 `info_points`、`info_events` 和 `camera_anchor_keyframes` JSON 列。清空输入框只灰显项目标签，输入框保持可编辑；点击 Save settings（All 或 Boutlist fields） 后该项停止读写，不会清空表中已有内容。默认映射启用现有 Boutlist 中的同名列，其他项目为空；已保存的自定义映射优先。Points JSON 与单独标量字段并存时，非空的单独标量字段优先。加载标注 SQLite 时，元数据冲突仍通过原有对话框选择来源。
+完整 `scale_calibration` JSON 始终写入输出标注 SQLite。Boutlist fields 中可独立指定 `scale_px_per_cm` 与 `scale_calibration` 列名，二者可以同时启用。另可启用 `info_points`、`info_events` 和 `camera_anchor_keyframes` JSON 列。在 Edit sync fields 中取消“启用/同步”并保存，该项停止读写，但保留列名及说明。默认行顺序按 Boutlist 的身份、视频信息、分析范围、位置、数据来源、对齐和备注排列；已保存的自定义顺序及映射优先。Points JSON 与单独标量字段并存时，非空的单独标量字段优先。加载标注 SQLite 时，元数据冲突仍通过原有对话框选择来源。
 
-核验字段在 Boutlist fields 的定义表中配置。Enabled 让问题出现在 Verify 中，开启 Sync 并映射到已有列后可编辑答案。答案保存在对应的 Boutlist 行。通过 Boutlist fields 或 All 范围的 Save settings 激活配置。
+核验字段通过 Boutlist fields → Edit review fields 配置。Enabled 让问题出现在 Verify 中；Sync 须先指定 Boutlist 列名。答案保存在对应的 Boutlist 行。窗口内的 Save settings 只启用并保存核验定义，不保存同步字段草稿或外部的保存前核验总开关。
 
 Events、逐帧位置、模板图像和全部 History 不在此表逐项保存。多人或多个实例同时修改同一个 CSV 时，应避免互相覆盖同一记录，并以写入前差异核对为准。
 
