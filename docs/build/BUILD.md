@@ -6,6 +6,11 @@ Run from the repository root / 在仓库根目录运行
 python docs/build/build_manual.py --pdf-dir release
 ```
 
+The date on the cover matches the YYYYMMDD suffix in each filename, for example
+`Annotation.Reviewer.User.Documentation.Chinese.version.20261105.pdf`.
+
+PDF 文件名中的 YYYYMMDD 与封面日期一致，命名格式如上。
+
 Requires Python 3.10+, Pandoc, PowerShell, and XeLaTeX or Tectonic. Use
 `--engine` to select a compiler by path. On Linux, install the TeX Live
 Chinese, LaTeX extra, and recommended font packages, plus the Noto CJK, TeX Gyre, and DejaVu fonts.

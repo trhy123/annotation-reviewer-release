@@ -2,7 +2,7 @@
 local first_header = true
 local navigation_labels = {['Return to the main contents']=true, ['Return to the main index']=true}
 local heading_contents = {}
-local symbols = {['⊠']=true, ['★']=true, ['↶']=true, ['↷']=true, ['↗']=true}
+local symbols = {['⊠']=true, ['★']=true, ['↶']=true, ['↷']=true, ['↔']=true, ['↗']=true}
 local function latex_escape(s)
   local chars = {['\\']='\\textbackslash{}',['{']='\\{',['}']='\\}',
     ['%']='\\%',['#']='\\#',['&']='\\&',['_']='\\_',
@@ -229,7 +229,11 @@ end
 local function restore_heading(el)
   -- 让 Pandoc 用原始标题生成完整的 PDF 书签文字，避免 RawInline 被丢弃。
   el.content = heading_contents[el.identifier]
-  return el
+  return pandoc.walk_block(el, {Str=function(word)
+    if word.text:find('↔', 1, true) then
+      return pandoc.RawInline('latex', latex_escape(word.text):gsub('↔', '\\texorpdfstring{{\\symbolfont ↔}}{↔}'))
+    end
+  end})
 end
 return {
   {Header=header, Table=table_layout, HorizontalRule=function() return {} end, Pandoc=document},

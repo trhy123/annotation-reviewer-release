@@ -192,7 +192,9 @@ def build_pdfs(output, engine=None):
                 for _ in range(3):
                     subprocess.run([tex, "-interaction=nonstopmode", "-halt-on-error", "main.tex"],
                                    cwd=layout, check=True)
-            pdfs[f"AnnotationReviewer-Manual-{language}.pdf"] = layout / "main.pdf"
+            language_name = "English" if language == "en" else "Chinese"
+            filename = f"Annotation.Reviewer.User.Documentation.{language_name}.version.{today:%Y%m%d}.pdf"
+            pdfs[filename] = layout / "main.pdf"
         output.mkdir(parents=True, exist_ok=True)
         for name, source in pdfs.items():
             shutil.copyfile(source, output / name)
