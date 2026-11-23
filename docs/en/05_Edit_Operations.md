@@ -4,13 +4,13 @@
 
 ## 5.1 Scope and shared inputs
 
-This volume covers Box, ID, Interpolate, and Swap. Trajectory, Scale, and Points/Events have separate volumes. ID, Range, and x/y/w/h at the top of Edit are operation inputs. They relate to the current selection in the image, but entering values does not immediately modify annotations.
+This volume covers Box, ID, Interpolate, and Swap. Trajectory, Scale, and Markers/Events have separate volumes. ID, Range, and x/y/w/h at the top of Edit are operation inputs. They relate to the current selection in the image, but entering values does not immediately modify annotations.
 
 Enter an identity in ID; All IDs extends the scope to all identities. Range uses video frame numbers and supports a single frame, an inclusive interval, or multiple comma-separated intervals, such as `120-150,180,200-230`; All frames includes all valid frames. Check both switches before a batch operation to avoid applying a correction intended for one frame to the entire video. An open endpoint such as `120-` extends to existing annotations. Delete, Change ID, and Change class confirmations show the actual first/last affected frame in each interval and the number of distinct affected frames, rather than an unused video tail.
 
 Click the shared **Range:** text button to reset Range to the current frame. Selecting IDs with Enter in the ID field or **S** preserves the current All frames state; with All frames off, existing Range input is retained.
 
-Press **Esc** during edit submission calculations to cancel, including while an input field has focus. The status bar reports “Operation canceled.” Results are discarded without changing annotations or History. Pending Continuous, Tracking, and Trajectory edits remain available for adjustment and retry. Successful calculations are still recorded as undoable operations.
+Press **Esc** during edit submission calculations to cancel, including while an input field has focus. The status bar reports “Operation canceled.” Results are discarded without changing annotations or History. Pending Continuous, Tracking, and Trajectory edits remain available for adjustment and retry. Successful calculations are still recorded as undoable operations. You can still seek, drag the timeline, switch tabs, and use controls that do not submit edits during the calculation. Esc also cancels undo/redo, final Tracking submission, and Match preparation/matching calculations. A save can be canceled with Esc while it is preparing, before it starts writing.
 
 x/y specifies the bounding box center and w/h its dimensions, in original-image pixels. Changing only the display zoom or pan does not modify these values. Link selection controls how ordinary selections are linked to the associated identities/ranges. After entering values explicitly, check the operation scope against the final displayed ID/Range.
 
@@ -52,7 +52,7 @@ For example, Range=`100` searches across all frames, rather than only frame 100;
 - All frames on: the rectangle identifies identities, and subsequent operations cover all frames of those identities. The local restriction to frames entering the rectangle is not retained.
 - With Accumulate on, dragging adds matches to the selection. Hold Shift while releasing the rectangle to subtract matching rows or identities, according to the frame scope. With Accumulate off, dragging replaces the selection.
 
-Exiting Choose range does not change All frames. Other selections or inputs may change the scope of subsequent editing. When performing several changes in succession, repeat the rectangle selection and check ID/Range. For the data layers in Raw/postprocessing previews, see the [Detection volume](04_Detection_Postprocessing_Tests.md); these layers must not be confused with the main review table.
+Exiting Choose range does not change All frames. Other selections or inputs may change the scope of subsequent editing. When performing several changes in succession, repeat the rectangle selection and check ID/Range. For the data layers in Raw/postprocessing previews, see the [Inference volume](04_Inference_Postprocessing_Tests.md); these layers must not be confused with the main review table.
 
 A quick rectangle drag is evaluated at the mouse-release position. If the rectangle is too small, its coordinates are invalid, or no objects match, the status bar explains the reason and retains the existing selection. A failed operation is not reported as successfully selecting zero IDs.
 
@@ -94,7 +94,7 @@ While Continuous editing remains active, right-clicking the canvas still commits
 
 Confirm is a three-state control governing whether a confirmation dialog appears before Change position, Change class, and Delete. Checked requires confirmation for all three; the intermediate state requires it only for Change class and Delete; unchecked disables confirmation for all three. It does not set the annotation row's manual confirmation status.
 
-Choose a class for Change class and click the adjacent Change button to apply it to the target scope. Delete removes annotations within its scope. It does not delete the video or original disk files, and does not delete an entire uncommitted Tracking interval.
+Choose a class for Change class and click the adjacent Change button to apply it to the target scope. Delete removes annotations within its scope. It does not delete the video or original disk files, and does not delete an entire uncommitted Tracking interval. Click the **Change class:** to clear the class input without modifying existing annotations.
 
 The Change class drop-down lists only classes configured in the INI file. The control itself summarizes the classes of the selected identities in the working table: it displays the class when all share one class, or multiple when two or more classes occur. This indicator is not added to the list as a selectable class. Statistics are cached by identity and data revision; playback and opening the list do not rescan the operation Range. Actual changes still follow the selected ID, Range, and All frames.
 
@@ -108,15 +108,15 @@ When operation details in Confirm edit are long, they appear in a scrollable, re
 
 ### 5.4.1 Merge ID
 
-Target is the identity to retain; Source is the identity to merge into it. Click Source to exchange the Target and Source inputs. Select chooses the identity pair in the image; Clear clears Source; Clear all clears this group of identity inputs. The blue and green timeline strips represent Target and Source respectively; red indicates frames in which both occur.
+Target is the identity to retain; Source is the identity to merge into it. Click **Merge ID:** to exchange the Target and Source inputs; click **Target:** or **Source:** to select the IDs in that input. Select chooses the identity pair in the image; Clear clears Source; Clear all clears this group of identity inputs. The blue and green timeline strips represent Target and Source respectively; red indicates frames in which both occur.
 
-Source accepts multiple IDs; Target requires one ID. Double-click the Source field to open a scrollable miniature ID input table below it. The original field still supports normal text selection, copying, and pasting. The miniature table supports Ctrl/Shift multiselection and Ctrl + A to select all; clicking a row selects its identity and navigates to its nearest occurrence, synchronizing the shared ID, image, and table highlighting. Delete in this table removes the selected IDs only from the Source input, without deleting annotations; Esc hides the table. When the ID subtab is active, Target boxes have a thick blue outline and Source boxes a thick green outline, updated immediately when inputs are entered or removed. These outlines are editing indicators for this page only and do not change saved annotations or display styles on other pages.
+Source accepts multiple IDs; Target requires one ID. Double-click the Source field to open a scrollable miniature ID input table below it. The original field still supports normal text selection, copying, and pasting. The miniature table supports Ctrl/Shift multiselection and Ctrl + A to select all; clicking a row selects its identity and navigates to its nearest occurrence, synchronizing the shared ID, image, and table highlighting. Delete in this table removes the selected IDs only from the Source input, without deleting annotations; Esc hides the table. While Edit is active, Target boxes have a thick blue outline and Source boxes a thick green outline, updated immediately when inputs are entered or removed. These outlines appear across Edit subtabs as editing indicators, without changing saved annotations or Display styles.
 
 On any Edit subpage, the **M** keyboard shortcut adds the active automatic ID to these inputs: it fills Target first if empty, otherwise appends to Source; pressing it again does not remove the ID. The **N** shortcut removes the active ID from Source, provided it is still selected and exists in the current frame. M/N do not merge anything; inputs and strips update immediately. Normal text entry remains available in text fields.
 
 Merge primarily unifies identities. It does not automatically determine which of two boxes in the same frame corresponds to the real target, and must not be used to conceal two distinct individuals present simultaneously. Inspect conflicting frames first; narrow the range, delete duplicate boxes, or use Swap as necessary.
 
-Interpolate between fills gaps between the relevant identity segments when at least one endpoint belongs to a Source. Gaps with Target at both endpoints remain unchanged. Deleted annotations count as gaps and can be filled again. When checked, it finds and interpolates gaps using the complete occurrence segments of the listed Target/Source identities. Interpolation is not restricted by the shared Range, although the ID merge itself still follows the current Range or All frames. For example, if Target occurs in frames 100–120, Source in 140–160, and Range is 140–160, merging Source also fills frames 121–139.
+Interpolate between fills gaps in the resulting Target when at least one endpoint originally belonged to a Source. Gaps with Target at both endpoints remain unchanged. Deleted annotations count as gaps and can be filled again. Range / All frames controls which Source annotations become Target. Gap filling then uses its existing annotations plus Source annotations actually transferred by this merge. Endpoint provenance determines which gaps qualify; interpolation itself prescinds Range. For example, with Target at frames 1–20, Source at 40–50, and Range=45-, only Source frame 45-50 changes ID, then Target frames 21–44 are interpolated. Source frame 40-44 remains outside Range and is not an interpolation endpoint for Target.
 
 #### Automatically finding continuable fragments
 
@@ -163,7 +163,7 @@ Use is off by default for other duplicate-box candidates. Select candidate rows,
 
 Multiple search batches can be appended to one list. When using matched ranges, select duplicate candidates for one reference ID at a time; check the reference identity in From ID. Subsequent changes to shared identities, Range, All frames, or data invalidate the local selection; use Use matched frames again. Explicitly choosing All frames/Apply on all instead operates on entire identities.
 
-Double-click the shared **ID**, shared **Range**, or Merge **Source** field to expand its miniature table; double-click the same field again or press Esc to collapse it. The original field still supports copying and pasting. ID/Source tables support click-to-navigate and Ctrl/Shift multiselection. The Range table lists input frame intervals row by row; selected rows can refill the shared Range and turn off All frames, while a click navigates to the clicked interval. Frame changes do not reparse or shrink the list. Delete in the Source table removes input items only, without deleting annotations. The shared ID/Range tables do not bind Delete, to avoid accidental deletion.
+Double-click the shared **ID**, shared **Range**, or Merge **Source** field to expand its miniature table; double-click the same field again or press Esc to collapse it. The original field still supports copying and pasting. ID/Source tables support click-to-navigate and Ctrl/Shift multiselection. The Range table lists input frame intervals row by row; selected rows can refill the shared Range and turn off All frames, while a click navigates to the clicked interval. Frame changes do not reparse or shrink the list. Delete in the Source table removes input items only, without deleting annotations. The shared ID/Range tables do not bind Delete, to avoid accidental deletion. Drag the column header to move a miniature table, double-clicking the column header also closes it; after moving, it stays open across tab switches. Closing and reopening resets its position and table selection, and restores automatic closing on tab switches.
 
 #### Confirming scope and handling overlaps
 
@@ -181,15 +181,15 @@ Conflicts include overlaps between Target and Source and between different Sourc
 
 The window does not take focus from the main window, allowing frame navigation for preview. The red strip covers all these conflict types. With three or more IDs in one interval, the retained identity must be chosen step by step, so the same frame interval may prompt for multiple identity pairs; the index/total reflects the actual number of required choices. Once all conflict choices are complete, merging, conflict deletion, and optional interpolation are committed together and can be undone as a whole.
 
-### 5.4.2 Change entire and Change range
+### 5.4.2 Change ID
 
-Enter the destination number in Change ID. Change entire renumbers the entire selected identity; Change range renumbers only the specified range, allowing a segment to be split from its original identity. Resolve overlap conflicts when the destination ID already exists; successful entry does not imply a unique identity in every frame.
+Enter the destination number in **Change ID**. **Change** renumbers the selected frames. **Split** applies the entered range; a single frame instead selects that frame and the rest of the track in the playback direction. With **Reverse** enabled, it selects that frame and the earlier frames. If the chosen range would produce a duplicate ID, review each overlap conflicts and choose which original box to keep, skip that range, or cancel. Click **Change ID:** to clear the destination field.
 
 Multiple selected automatic IDs can be changed to the same number in one operation. Unselected identities are unaffected, and the entire renumbering can be undone in one step. Before execution, same-frame duplicates are checked between the destination and each source, and between different sources. A destination ID occurring only in other, nonoverlapping frames does not trigger a duplicate warning. If multiple boxes would actually share a frame, the conflicting frames are listed and confirmation is requested; canceling applies no part of the operation.
 
 Find under Duplicate ID checks duplicate rows with the same ID in the same frame. Locate duplicate frames first, then use the image to decide which box to retain. The same ID appearing in different frames is a normal trajectory, not a duplicate conflict.
 
-**Example: the latter half of ID 25 switches to another individual.** Set Range from the first incorrect-identity frame to the end, split that segment with Change range, then check its actual identity. If two trajectories exchange identities at the same time, Swap is more direct.
+**Example: the latter half of ID 25 switches to another individual.** Enter the first incorrect-identity frame in Range and click Split with Reverse off, then check its actual identity. If two trajectories exchange identities at the same time, Swap is more direct.
 
 ## 5.5 Interpolate: endpoint geometry and interpolation
 
@@ -295,7 +295,7 @@ Missing targets, multiple boxes for one ID, nearly coincident boxes, paths cross
 
 **For example, A and B have correct IDs 001 and 002 but repeatedly switch in frames 101, 103, 105, 108–112, and 115:** use correctly identified frames 100 and 116 as anchors, set Range to `101-115`, and enter `001,002` at both ends. Position attempts to correct only clearly mismatched frames while retaining other correct frames. For cascading identity switches among four neighboring targets, enter all four IDs and use the same preview procedure; unlisted targets do not participate.
 
-Position modifies result identities only. It does not move, add, or delete boxes, or change Class or Raw ID. It operates on the currently loaded review annotations. For Detection Raw/temporary postprocessing previews, use Load result first to avoid treating another data layer as the main table.
+Position modifies result identities only. It does not move, add, or delete boxes, or change Class or Raw ID. It operates on the currently loaded review annotations. For Inference Raw/temporary postprocessing previews, use Load result first to avoid treating another data layer as the main table.
 
 ## 5.7 Operation stash
 
@@ -359,7 +359,7 @@ After video indexing completes, stashed endpoints reconcile frame numbers by ima
 
 ## 5.8 Saving edits during a postprocessing preview
 
-In Raw cache or a postprocessing preview, click a box to establish its source before using these inputs. Editing Raw writes to Raw cache; editing a postprocessed box modifies only the result copy, without automatically changing Raw cache or the original review annotations. To write back, use Apply to Raw in Postprocess settings, then manually run Reprocess range. Use Save preview to retain results. Canceling the parameter window does not undo box edits; use Undo/Redo. See [Preview editing and range reprocessing](04_Detection_Postprocessing_Tests.md#451-editing-raw-and-results).
+In Raw cache or a postprocessing preview, click a box to establish its source before using these inputs. Editing Raw writes to Raw cache; editing a postprocessed box modifies only the result copy, without automatically changing Raw cache or the original review annotations. To write back, use Apply to Raw in Postprocess settings, then manually run Reprocess range. Use Save preview to retain results. Canceling the parameter window does not undo box edits; use Undo/Redo. See [Preview editing and range reprocessing](04_Inference_Postprocessing_Tests.md#451-editing-raw-and-results).
 
 ## 5.9 Acceptance checks and saving
 

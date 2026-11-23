@@ -1,4 +1,4 @@
-# 4 Detection Postprocessing Tests
+# 4 Inference Postprocessing Tests
 
 [Return to the main contents](00_Annotation_Reviewer_User_Manual.md)
 

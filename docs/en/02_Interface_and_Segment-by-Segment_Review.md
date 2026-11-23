@@ -70,7 +70,7 @@ The current progress position is used for playback/frame stepping. One selected 
 | Binding verification | Single manual identity selected or binding bands set to always display | Confirmed bright green, Confirmed · Modified dark green, Stale / Conflict red; above candidate bands |
 | Events | Events tab | Configured type color and Band row; alpha 0.7. Smaller Priority draws on top; selected events have a contrast outline. Band 0 hides the strip |
 | Video export time range | File page | Red, indicating Export Range; the current video's preview range remains after Export settings closes |
-| Detection postprocessing preview | During Raw / Postprocess preview | Raw coverage blue, postprocessed result range green, manually modified frames brown-red, completed computation pale green; selected range yellow |
+| Inference postprocessing preview | During Raw / Postprocess preview | Raw coverage blue, postprocessed result range green, manually modified frames brown-red, completed computation pale green; selected range yellow |
 
 Merge Target / Source inputs immediately add thick blue/green outlines to the corresponding boxes throughout all Edit subpages; the outlines hide when leaving Edit. The candidate result window centers on the current frame, using yellow numbered cells or gap lines for positioning; changing frames retains the manual single or multiple selection. Row backgrounds and candidate bands use cyclic colors, while candidate ID numbers in the table and beside bands use assigned identity colors. Only checked Use boxes determine which candidates populate Source; selection or navigation does not mean a merge has occurred.
 
@@ -136,6 +136,8 @@ Metric grid draws a grid with physical spacing according to Scale calibration. G
 **Example: an obliquely filmed wall.** Grid intervals representing the same 1 cm may appear narrower in the distance and wider nearby. First check the model and constraints in Scale, then inspect their plausibility using the grid; do not enter unknown real angles merely to make the grid “look square”.
 
 ## 2.9 Trail before and Trail after
+
+With Camera motion compensation enabled, trail points are mapped from their own frames into a common background coordinate space, then projected into the current view. A point fixed to the background leaves no trail from camera motion alone. In Expanded motion canvas, trails stay aligned with the stabilized background.
 
 ### 2.9.1 Length and Object Scope
 

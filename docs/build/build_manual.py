@@ -1,13 +1,17 @@
-"""Merge numbered Markdown chapters and link project resources in place."""
+"""Merge numbered Markdown chapters or build both manual PDFs."""
 from pathlib import Path
+from datetime import date
 import argparse
 import re
 import shutil
+import subprocess
+import tempfile
 import unicodedata
 import os
 from urllib.parse import unquote, urlsplit
 
-ROOT = Path(__file__).resolve().parents[1]
+TEMPLATE = Path(__file__).resolve().parent
+ROOT = TEMPLATE.parents[1]
 CHAPTER = re.compile(r'^(\d{2})_.+\.md$')
 HEADING = re.compile(r'^(#{1,6})\s+(\d+(?:\.\d+)*)\s+(.+?)\s*#*\s*$')
 LINK = re.compile(r'(!?\[[^\]\n]*\]\()(<[^>]+>|[^\s)]+)([^)\n]*\))')
@@ -154,12 +158,60 @@ def merge_manual(docs, output):
     return len(files), len(assets)
 
 
+def build_pdfs(output, engine=None):
+    output = Path(output).resolve()
+    pandoc = shutil.which("pandoc")
+    pwsh = shutil.which("pwsh") or shutil.which("powershell")
+    tex = engine or shutil.which("xelatex") or shutil.which("tectonic")
+    if not pandoc or not pwsh or not tex:
+        raise ValueError("PDF builds need Pandoc, PowerShell, and XeLaTeX or Tectonic.")
+    # Conversion and TeX intermediates stay outside the source tree.
+    with tempfile.TemporaryDirectory(prefix="ar-manual-") as folder:
+        work = Path(folder)
+        today = date.today()
+        pdfs = {}
+        for language in ("en", "zh"):
+            layout = work / language
+            shutil.copytree(TEMPLATE / language, layout)
+            shutil.copytree(TEMPLATE / "fonts", layout / "fonts")
+            for name in ("format-tables.ps1", "toc-style.tex", "tweaks.tex"):
+                shutil.copyfile(TEMPLATE / name, layout / name)
+            merge_manual(ROOT / "docs" / language, layout / "manual.md")
+            date_text = today.isoformat() if language == "en" else f"{today.year}年{today.month}月{today.day}日"
+            (layout / "build-info.tex").write_text(
+                rf"\newcommand{{\ManualDate}}{{{date_text}}}" + "\n", encoding="utf-8")
+            print(f"Building {language} PDF", flush=True)
+            subprocess.run([pandoc, "manual.md", "--from=gfm+tex_math_dollars", "--to=latex",
+                            "--top-level-division=chapter", "--lua-filter=layout.lua",
+                            "--no-highlight", "--wrap=none", "--output=content.tex"],
+                           cwd=layout, check=True)
+            subprocess.run([pwsh, "-NoProfile", "-File", "format-tables.ps1"], cwd=layout, check=True)
+            if "tectonic" in Path(tex).stem.lower():
+                subprocess.run([tex, "main.tex"], cwd=layout, check=True)
+            else:
+                for _ in range(3):
+                    subprocess.run([tex, "-interaction=nonstopmode", "-halt-on-error", "main.tex"],
+                                   cwd=layout, check=True)
+            pdfs[f"AnnotationReviewer-Manual-{language}.pdf"] = layout / "main.pdf"
+        output.mkdir(parents=True, exist_ok=True)
+        for name, source in pdfs.items():
+            shutil.copyfile(source, output / name)
+            print(output / name)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--docs', type=Path, help='Folder containing numbered Markdown chapters; prompts when omitted.')
     parser.add_argument('--output', type=Path, help='Destination Markdown file; prompts when omitted, with a suggested default.')
+    parser.add_argument('--pdf-dir', type=Path, help='Build both manual PDFs in this directory.')
+    parser.add_argument('--engine', help='Optional path to xelatex or tectonic.')
     args = parser.parse_args()
+    if args.pdf_dir is not None and (args.docs is not None or args.output is not None):
+        parser.error('--pdf-dir cannot be combined with --docs or --output')
     try:
+        if args.pdf_dir is not None:
+            build_pdfs(args.pdf_dir, args.engine)
+            return
         docs = args.docs
         if docs is None:
             answer = input('Source document folder: ').strip().strip('"')
@@ -176,7 +228,7 @@ def main():
         count, assets = merge_manual(docs, output)
     except (EOFError, KeyboardInterrupt):
         parser.exit(1, 'Cancelled: document folder or output was not provided.\n')
-    except (ValueError, OSError) as exc:
+    except (ValueError, OSError, subprocess.CalledProcessError) as exc:
         parser.exit(1, f'Error: {exc}\n')
     print(f'Merged {count} chapters and {assets} assets: {output.resolve()}')
 

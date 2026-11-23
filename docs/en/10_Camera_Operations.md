@@ -78,7 +78,7 @@ Camera keyframes and toggles are session metadata. Disabling Enable retains anch
 | Estimate | Estimates camera displacement from video image changes; results still require inspection |
 | Track | Tracks the current background anchor using a template, with a preview before committing |
 
-The anchor table organizes observations/changes by time. Click a column to navigate to the corresponding frame, and verify the anchor slot before editing values; deleting table selections should affect only the corresponding cells or keyframes. The model name changes with available anchors and geometry; the count selected in the dropdown alone does not guarantee a stable solution.
+The anchor table organizes observations/changes by time. Scroll the wheel to move horizontally, or hold Alt to move vertically. Columns share a width; resizing any column resizes all columns. Click a column to navigate to the corresponding frame, and verify the anchor slot before editing values; deleting table selections should affect only the corresponding cells or keyframes. The model name changes with available anchors and geometry; the count selected in the dropdown alone does not guarantee a stable solution.
 
 ## 10.6 Models and Anchor Layout
 

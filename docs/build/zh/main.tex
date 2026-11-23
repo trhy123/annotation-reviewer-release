@@ -1,0 +1,23 @@
+% !TEX program = xelatex
+\documentclass[UTF8,a4paper,zihao=5,fontset=none,twoside,openany]{ctexrep}
+\input{preamble.tex}
+\begin{document}
+\pagenumbering{roman}
+\thispagestyle{plain}
+\hypertarget{manual-contents}{}
+\bookmark[level=0,dest=manual-contents]{目录}
+\begingroup
+\setlength{\parskip}{0pt}
+\setlength{\multicolsep}{0pt}
+{\centering\rmfamily\headingfont\bfseries\fontsize{22}{26}\selectfont\color{accent} Annotation Reviewer 操作手册\par}
+{\centering\small 更新日期 \ManualDate\par}
+\vspace{3pt}
+{\setstretch{1}\rmfamily\headingfont\fontsize{12}{14.4}\selectfont\bfseries 目录\par}
+\begin{multicols}{2}
+\manualtoc
+\end{multicols}
+\endgroup
+\cleardoublepage
+\pagenumbering{arabic}
+\input{content.tex}
+\end{document}

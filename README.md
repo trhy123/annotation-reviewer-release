@@ -18,12 +18,12 @@ English | [中文](README_zh.md)
 
 ![Annotation Reviewer interface](packaging/AnnotationReviewerUI_view1.png)
 
-A cross-platform Qt application for reviewing video annotations, with a separately packaged YOLO `DetectionWorker`. It supports video playback, annotation display and editing, manual-trajectory alignment and matching, detection review, and annotated-video export. Each video has one SQLite result file containing raw data, final annotations, metadata, and command history. Existing CSV files can be imported. Save updates the current SQLite file; Save as adds a timestamp by default and can write SQLite or export a compatible CSV file.
+A cross-platform Qt application for reviewing video annotations, with a separately packaged YOLO `DetectionWorker`. It supports video playback, annotation display and editing, manual-trajectory alignment and matching, model inference, and annotated-video export. Each video has one SQLite annotation file containing raw data, final annotations, metadata, and command history. Existing CSV files can be imported. Save updates the current SQLite file; Save as adds a timestamp by default and can write SQLite or export a compatible CSV file.
 
 ## Main Features
 
 - Video playback, pause, frame stepping, seeking, and looping
-- Detection boxes, trails, IDs, coordinate axes, and manual-trajectory overlays
+- Annotation boxes, trails, IDs, coordinate axes, and manual-trajectory overlays
 - High-performance OpenGL annotation previews and a Qt/OpenCV CPU fallback
 - Browsing, selecting, editing, and saving automatic and manual annotations in tables
 - Opening files through startup arguments, or jumping to a segment and selecting IDs from a review queue or target arguments; neither requires a Boutlist. See the [navigation interface](docs/en/01_Basic_Operations.md#135-review-queue-and-navigation-interface)
@@ -41,10 +41,10 @@ Windows and Linux use a portable folder with sibling components:
 AnnotationReviewer-<platform>/
 ├─ AnnotationReviewer.exe / AnnotationReviewer  # Main application
 ├─ _internal/                                   # Main application libraries
-├─ DetectionWorker/                             # Detection executable and libraries
+├─ DetectionWorker/                             # Inference executable and libraries
 ├─ runtime/{bin,lib,licenses}/                  # FFmpeg, FFprobe, and libmpv
 ├─ settings.ini                                 # User configuration
-├─ presets_detection/                           # Detection postprocessing presets
+├─ presets_detection/                           # Inference postprocessing presets
 ├─ translations/                                # UI language files
 ├─ cache/{overlay_layers,pts,recovery}/         # Caches and recovery data
 └─ models/                                      # Model weights
@@ -60,7 +60,7 @@ AnnotationReviewer-macos-<arch>/
 │  ├─ Frameworks/                               # Python, Qt, media-runtime/lib, etc.
 │  └─ Resources/                                # Default configuration, presets, licenses
 ├─ settings.ini                                 # User configuration
-├─ presets_detection/                           # Detection postprocessing presets
+├─ presets_detection/                           # Inference postprocessing presets
 ├─ translations/                                # UI language files
 ├─ cache/{overlay_layers,pts,recovery}/         # Caches and recovery data
 ├─ models/                                      # Model weights
@@ -70,7 +70,7 @@ AnnotationReviewer-macos-<arch>/
 **Moving the entire macOS portable folder** preserves the sibling `settings.ini` as the preferred configuration. Relative paths for models, editable presets, caches, and results are resolved against that folder. **Moving only the `.app`**, when its new location has no sibling configuration, uses `~/Library/Application Support/AnnotationReviewer/` for configuration and user data, and `~/Library/Caches/AnnotationReviewer/` for the default system cache. Explicit cache paths in an existing configuration take precedence. The application does not write user data into the signed `.app` and does not require an external runtime or Worker.
 
 
-The GUI does not bundle PyTorch, Ultralytics, or scikit-image; model inference runs in `DetectionWorker`. The GUI uses SciPy for trajectory interpolation and smoothing. Starting or stopping detection, or a GPU-memory error in detection, therefore does not directly bring down the GUI process.
+The GUI does not bundle PyTorch, Ultralytics, or scikit-image; model inference runs in `DetectionWorker`. The GUI uses SciPy for trajectory interpolation and smoothing. Starting or stopping inference, or a GPU-memory error in the worker, therefore does not directly bring down the GUI process.
 
 
 ## Video and Annotation Backends
@@ -148,7 +148,7 @@ settings.linux.ini
 
 Each platform build supplies an editable sibling `settings.ini`. macOS also retains a read-only template at `Contents/Resources/settings.macos.ini` to initialize user configuration when only the `.app` is moved. When running from source, a missing configuration is initialized from the current platform's template. Parameters absent from that template use one shared set of code defaults across operating systems.
 
-The shared code defaults are: 4 decoding threads, 4 Detection FFmpeg threads, 2 prediction workers, YOLO batch size 8, a 48-frame playback queue with a 64-frame buffer, and 128 MiB for each of the two Overlay caches. Platform templates and saved user values take precedence; existing configurations are not automatically overwritten.
+The shared code defaults are: 4 decoding threads, 4 Inference FFmpeg threads, 2 prediction workers, YOLO batch size 8, a 48-frame playback queue with a 64-frame buffer, and 128 MiB for each of the two Overlay caches. Platform templates and saved user values take precedence; existing configurations are not automatically overwritten.
 
 `settings.ini` stores external executable paths, model paths, decoding and rendering modes, window layout, table column widths, annotation styles, and other preferences. Recovery files and Overlay caches are written to `cache/`; `runtime/` is reserved for media dependencies. Deleting `settings.ini` resets the configuration.
 

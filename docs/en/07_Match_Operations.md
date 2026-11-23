@@ -8,7 +8,7 @@ Match aligns manual Tracker trajectories with automatic detections, computes can
 
 Manual trajectories provide continuous identities and approximate spatial positions, but may contain click errors, timing delays, and occasional outliers. Automatic boxes usually provide more detailed per-frame geometry, but may have fragmented tracks, identity switches, or missed detections. Matching and combining them allows complementary information to improve annotation quality. Match uses both types of information without treating every point from either as absolutely correct.
 
-Trajectories in automatic detection CSV files come from the YOLO/tracking pipeline and usually have fields such as `track_id`, `x/y/w/h`, and `class`. Manual trajectories come from Tracker `.trk` files or converted `manual_track_file` CSV files, usually containing only point coordinates, trajectory names, roles, classes, and frame numbers. `Match` places both on the same video-frame coordinate axis and establishes bindings identifying which automatic detection ID corresponds to a segment of a manual trajectory.
+Trajectories in automatic annotation files come from the YOLO/tracking pipeline and usually have fields such as `track_id`, `x/y/w/h`, and `class`. Manual trajectories come from Tracker `.trk` files or converted `manual_track_file` CSV files, usually containing only point coordinates, trajectory names, roles, classes, and frame numbers. `Match` places both on the same video-frame coordinate axis and establishes bindings identifying which automatic detection ID corresponds to a segment of a manual trajectory.
 
 The core procedure has three steps:
 
@@ -46,12 +46,14 @@ Configure Boutlist column mappings before opening a record. The program can read
 The timeline alignment formula is:
 
 $$
-\mathrm{capture\_frame} + \mathrm{sign} \times (\mathrm{trk\_frame} - \mathrm{trk\_capture\_frame}) \times \frac{\mathrm{det\_fps}}{\mathrm{trk\_fps}}
+\mathrm{video\_reference} + \mathrm{sign} \times (\mathrm{trk\_frame} - \mathrm{trk\_capture\_frame}) \times \frac{\mathrm{det\_fps}}{\mathrm{trk\_fps}}
 $$
 
 Here, `sign=-1` when `trk_reverse=True`.
 
-Changing video Capture shifts an existing Tracker calibration reference by the Capture difference multiplied by the trk/video FPS ratio; reversed changes the sign. Prepared manual points keep their alignment. The reference may be fractional or outside the sampled source range; blank means unset. Undo/redo restores both references together. With equal frame rates, the reference changes by the same number of frames.
+The formula takes `video_reference` from **align to video**. Enter a positive integer frame number or a Frame marker reference such as `${analysis_start_frame}`. The default `${capture_frame}` refers to Capture. A fixed frame number sets alignment independently of Capture. The field shows the resolved frame number and reveals the expression when focused for editing. Clear the field to restore the default. The annotation file stores the number or expression, and the Boutlist mapping uses `trk_video_reference`.
+
+When using the default reference, changing Capture adjusts a set Tracker calibration frame by the Capture difference times the trk/video FPS ratio. Reversed changes the sign, keeping prepared manual points aligned. The Tracker calibration frame may be fractional or outside the sampled source range.
 
 ### 7.3.1 Parameter table
 
@@ -60,12 +62,12 @@ Changing video Capture shifts an existing Tracker calibration reference by the C
 | Start-End range in trk | Original Tracker frame range to process; not the video Range |
 | Fps of trk | Frame rate of the video used for manual tracking; maps manual frames to video frames by time ratio |
 | reversed | Reverse the frame-axis mapping when the manual trajectory comes from a reversed video; check this when annotation in Tracker used a reversed video |
-| Calibration frame (capture) in trk | Event reference frame on the manual timeline, used as the alignment anchor; usually the capture frame |
-| align to video | Corresponding frame of the same event in the current video |
+| Calibration frame in trk | Alignment reference frame on the manual timeline |
+| align to video | Corresponding video frame number or Frame marker reference |
 | Frame offset | Video-frame offset added to the base mapping; positive advances toward later frames |
 | x/y offset | Pixel offsets of manual points in original-image coordinates; positive X is rightward and positive Y downward |
 | Auto set offset | Prepare manual data again using the current timing information and estimate alignment; may overwrite existing frame/x/y offsets after a confirmation dialog |
-| Preview points | Refresh the manual-point preview using current offsets; does not generate final bindings |
+| Preview points | Refresh the manual-point preview using current timing references and offsets |
 | Sync from / Sync to | Read relevant alignment fields from the selected Boutlist record or write them back to it |
 
 ### 7.3.2 Recommended procedure

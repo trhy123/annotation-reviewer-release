@@ -96,11 +96,11 @@ A field's presence does not establish that it is populated and valid. Frame numb
 
 ### 13.5.1 Reading
 
-Open Boutlist → select a record → verify actual paths in File → check Points and Match parameters → play key frames. Field mappings only associate column names; they do not correct incorrectly paired videos or frame numbers.
+Open Boutlist → select a record → verify actual paths in File → check Markers and Match parameters → play key frames. Field mappings only associate column names; they do not correct incorrectly paired videos or frame numbers.
 
 ### 13.5.2 Writing Back
 
-1. Modify and confirm the relevant information in Points or Match.
+1. Modify and confirm the relevant information in Markers or Match.
 2. Run Sync to, or inspect differences when prompted to write back.
 3. Confirm the displayed target row and actual column names.
 4. Reread the row afterward to verify it.
@@ -142,7 +142,7 @@ Browse provides convenient, accurate path entry through visual file selection, s
 
 **Example:** Change a row's review_notes from blank to `Capture pair checked`; after clicking the main window, the cell is saved and shown in the system accent color. Closing Select bout does not lose the change. Reopen it, enable Edit, and press ↶ to restore the blank value and write it back; returning to the baseline restores normal text color.
 
-Editing metadata cells for the current bout updates only Boutlist and the current row location snapshot; it does not overwrite loaded Points, alignment, or calibration in the main window. Use the corresponding Sync from to read new metadata. Open on the current row does not reload files.
+Editing metadata cells for the current bout updates only Boutlist and the current row location snapshot; it does not overwrite loaded Markers, alignment, or calibration in the main window. Use the corresponding Sync from to read new metadata. Open on the current row does not reload files.
 
 ### 13.5.5 Drag-Filling Cells
 
@@ -170,7 +170,7 @@ Disk contents are checked before writing to prevent overwriting other programs' 
 
 Write-back updates only corresponding mapped fields, leaving other columns and unmodified cell text unchanged; for example, updating Capture should not reformat identifier `001` or a custom column value `1.2300` throughout the table.
 
-Complete `scale_calibration` JSON is always written to output annotation SQLite. Boutlist fields allows independent column names for `scale_px_per_cm` and `scale_calibration`, both of which can be enabled together. JSON columns for `info_points`, `info_events`, and `camera_anchor_keyframes` can also be enabled. In Edit sync fields, uncheck Enabled/Sync and save to stop reading and writing an item while retaining its column name and Tip. Default rows follow the Boutlist’s identity, video, analysis, location, source, alignment, and notes fields; saved custom ordering and mappings take precedence. If Points JSON and separate scalar fields coexist, nonempty separate scalar fields take precedence. Loading annotation SQLite still uses the existing source-selection dialog for metadata conflicts.
+Complete `scale_calibration` JSON is always written to output annotation SQLite. Boutlist fields allows independent column names for `scale_px_per_cm` and `scale_calibration`, both of which can be enabled together. JSON columns for `info_points`, `info_events`, and `camera_anchor_keyframes` can also be enabled. In Edit sync fields, uncheck Enabled/Sync and save to stop reading and writing an item while retaining its column name and Tip. Default rows follow the Boutlist’s identity, video, analysis, location, source, alignment, and notes fields; saved custom ordering and mappings take precedence. If Markers JSON and separate scalar fields coexist, nonempty separate scalar fields take precedence. Loading annotation SQLite still uses the existing source-selection dialog for metadata conflicts.
 
 Configure review fields through Boutlist fields → Edit review fields. Enabled shows the question in Verify. Sync requires a mapped Boutlist column. Review answers are stored in the corresponding Boutlist row. The window’s Save settings activates only review definitions; it does not save sync-field drafts or the outer before-saving switch.
 

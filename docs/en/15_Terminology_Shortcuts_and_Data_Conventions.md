@@ -66,6 +66,7 @@
 | M | On any Edit subpage, enters the active ID as Merge target; if a target exists, appends it to the source set |
 | N | On any Edit subpage, removes selected active IDs present in the current frame from Merge Source; does not merge |
 | Alt + L | Cycles through the interface languages in list order |
+| Alt + T | Switches between Light and Dark. From Follow system, switches to Light |
 | Alt + left-click | Immediately marks the current frame manually in the image, retaining the session, Track ID, and templates; releasing Alt does not commit the segment |
 | Alt + Shift + left-click | Selects a template in the image and switches to Track Motion; Run Auto is then started manually |
 | Ctrl + Alt (held) | After entering manual marking, continuously specifies positions from the mouse, stepping frames according to Speed and Tracking Reverse; releasing either key pauses |
@@ -110,11 +111,11 @@ Fields are meaningful only when the corresponding operation produces that inform
 
 Other existing fields are retained according to editing rules. To identify Tracking position sources, prioritize `position_source` and History rather than inferring the algorithm entirely from original `detected` or `confidence` fields.
 
-### 15.3.3 Match and Detection Sources
+### 15.3.3 Match and Inference Sources
 
 Match also records manual_track_name, manual_binding_state, manual_binding_finalized, manual_binding_manual_only, manual_binding_position_source, and corresponding source identities. Binding sources and Tracking position_source are not interchangeable. Internal `_...` fields support transactions and caching and should not be used directly as analysis measures.
 
-Interpret Detection observations and estimates together with detected, interpolation/source markers, and parameter snapshots. In postprocessing, R indicates a recovery event and ~ an estimated position. Confidence, matching Score, Margin, and review status are different quantities; one threshold cannot replace all quality control.
+Interpret Inference observations and estimates together with detected, interpolation/source markers, and parameter snapshots. In postprocessing, R indicates a recovery event and ~ an estimated position. Confidence, matching Score, Margin, and review status are different quantities; one threshold cannot replace all quality control.
 
 Consecutive numbering ensures image correspondence but does not guarantee continuous physical recording time. Frame difference/FPS gives nominal frame time; state this model in the methods when using it for motion analysis.
 

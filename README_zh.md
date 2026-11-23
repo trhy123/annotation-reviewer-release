@@ -18,7 +18,7 @@
 
 ![Annotation Reviewer interface](packaging/AnnotationReviewerUI_view1.png)
 
-跨平台 Qt 视频标注审核工具，包含独立打包的 YOLO `DetectionWorker`。程序用于视频播放、标注呈现与编辑、手工轨迹对齐匹配、检测结果审核及带标注视频导出。每视频一个 SQLite 结果文件，包含 raw、final、metadata 和历史命令；旧 CSV 可导入。Save 写回当前 SQLite，Save as 默认带日期时间，可另存 SQLite 或兼容导出旧 CSV。
+跨平台 Qt 视频标注审核工具，包含独立打包的 YOLO `DetectionWorker`。程序用于视频播放、标注呈现与编辑、手工轨迹对齐匹配、检测结果审核及带标注视频导出。每视频一个 SQLite 标注文件，包含 raw、final、metadata 和历史命令；旧 CSV 可导入。Save 写回当前 SQLite，Save as 默认带日期时间，可另存 SQLite 或兼容导出旧 CSV。
 
 ## 主要功能
 
@@ -41,7 +41,7 @@ Windows/Linux 保持同级绿色版目录：
 AnnotationReviewer-<platform>/
 ├─ AnnotationReviewer.exe / AnnotationReviewer  # 主程序
 ├─ _internal/                                   # 主程序运行库
-├─ DetectionWorker/                             # 检测程序及其运行库
+├─ DetectionWorker/                             # 推理程序及其运行库
 ├─ runtime/{bin,lib,licenses}/                  # FFmpeg、FFprobe、libmpv
 ├─ settings.ini                                 # 配置文件
 ├─ presets_detection/                           # 检测后处理预设
@@ -70,7 +70,7 @@ AnnotationReviewer-macos-<arch>/
 **移动整个 macOS 绿色版目录**时，优先使用 `.app` 同级 `settings.ini`；模型、可编辑预设、缓存和结果的相对路径以该目录为基准。**只移动 `.app`**、且新位置没有同级配置时，使用 `~/Library/Application Support/AnnotationReviewer/` 保存配置与用户数据，系统默认缓存位于 `~/Library/Caches/AnnotationReviewer/`。已有配置中显式指定的缓存路径优先。程序不向已签名 `.app` 写入用户数据，也不要求外置 runtime 或 Worker。
 
 
-GUI 不包含 PyTorch、Ultralytics 或 scikit-image；模型推理由 `DetectionWorker` 承载。GUI 使用 SciPy 支持轨迹插值、平滑等功能。因此检测进程的启动、退出或显存错误不会直接破坏 GUI 进程。
+GUI 不包含 PyTorch、Ultralytics 或 scikit-image；模型推理由 `DetectionWorker` 承载。GUI 使用 SciPy 支持轨迹插值、平滑等功能。因此推理进程的启动、退出或显存错误不会直接破坏 GUI 进程。
 
 
 ## 视频与标注后端
@@ -148,7 +148,7 @@ settings.linux.ini
 
 各平台构建均提供可编辑的同级 `settings.ini`。macOS 还在 `Contents/Resources/settings.macos.ini` 保留只读模板，供单独移动 `.app` 后初始化用户配置。直接运行源码时，缺少配置文件会复制当前平台模板；模板未提供的参数采用同一套代码默认值，不按操作系统区分。
 
-代码备用值统一为：解码线程 4、Detection FFmpeg 线程 4、预测 Worker 2、YOLO batch 8、播放队列 48 帧／缓冲 64 帧、两项 Overlay 缓存各 128 MiB。平台模板和用户已保存的数值优先，不自动覆盖现有配置。
+代码备用值统一为：解码线程 4、推理 FFmpeg 线程 4、预测 Worker 2、YOLO batch 8、播放队列 48 帧／缓冲 64 帧、两项 Overlay 缓存各 128 MiB。平台模板和用户已保存的数值优先，不自动覆盖现有配置。
 
 `settings.ini` 保存外部程序路径、模型路径、解码与渲染模式、窗口布局、表格列宽、标注样式及其他用户设置。恢复文件和 Overlay 缓存写入 `cache/`；`runtime/` 只用于媒体依赖。删除 `settings.ini` 会重置配置。
 

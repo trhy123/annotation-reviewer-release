@@ -1,0 +1,220 @@
+% Contents-only layout, independent of regenerated Markdown content.
+\setlength{\cftbeforechapskip}{8pt}
+\bookmarksetup{open=true,openlevel=1}
+\makeatletter
+\newcount\manual@toclevel
+\def\manual@splitnumber#1 #2\manual@stop{%
+  \def\manual@tocnumber{#1}%
+  \def\manual@toctitle{#2}%
+}
+\newcommand{\manual@numberedcontentsline}[4]{%
+  \def\manual@kind{#1}%
+  \def\manual@chapter{chapter}%
+  \def\manual@section{section}%
+  \ifx\manual@kind\manual@chapter
+    \manual@toclevel=0
+  \else\ifx\manual@kind\manual@section
+    \manual@toclevel=1
+  \else
+    \manual@toclevel=2
+  \fi\fi
+  \begingroup
+    \manual@splitnumber#2\manual@stop
+    \ifcase\manual@toclevel
+      \settowidth{\cftchapnumwidth}{\cftchapfont\manual@tocnumber\enspace}%
+    \or
+      \settowidth{\cftsecnumwidth}{\cftsecfont\manual@tocnumber\enspace}%
+    \else
+      \settowidth{\cftsubsecnumwidth}{\cftsubsecfont\manual@tocnumber\enspace}%
+    \fi
+    \ifnum\manual@toclevel=2
+      \color{tocmuted}\hypersetup{linkcolor=tocmuted}%
+    \else
+      \color{black}\hypersetup{linkcolor=black}%
+    \fi
+    \manual@savedcontentsline{#1}{\numberline{\manual@entrystrut\manual@tocnumber}\manual@toctitle}{#3}{#4}%
+  \endgroup
+}
+% Choose column breaks locally; a third-level entry may start a column.
+\newcount\manual@total
+\newcount\manual@start
+\newcount\manual@index
+\newcount\manual@natural
+\newcount\manual@break
+\newcount\manual@candidate
+\newcount\manual@prior
+\newcount\manual@rank
+\newcount\manual@rows
+\newcount\manual@shift
+\newcount\manual@column
+\newdimen\manual@capacity
+\newdimen\manual@used
+\newdimen\manual@fullheight
+\newdimen\manual@remaining
+\newdimen\manual@needed
+\newdimen\manual@before
+\newdimen\manual@strutheight
+\newdimen\manual@strutdepth
+\newif\ifmanual@legal
+\newcommand{\manual@entrystrut}{%
+  \vrule width0pt height\manual@strutheight depth\manual@strutdepth}
+\def\manual@level#1{\csname manual@level@\number#1\endcsname}
+\def\manual@lines#1{\csname manual@lines@\number#1\endcsname}
+\def\manual@height#1{\dimexpr
+  \ht\csname manual@box@\number#1\endcsname+
+  \dp\csname manual@box@\number#1\endcsname\relax}
+\def\manual@toc@chapter{0}
+\def\manual@toc@section{1}
+\def\manual@toc@subsection{2}
+\newcommand{\manual@contentsline}[4]{%
+  \ifcsname manual@toc@#1\endcsname
+    \advance\manual@total\@ne
+    \expandafter\newbox\csname manual@box@\the\manual@total\endcsname
+    \expandafter\edef\csname manual@level@\the\manual@total\endcsname{%
+      \csname manual@toc@#1\endcsname}%
+    \setbox\csname manual@box@\the\manual@total\endcsname=\vbox{%
+      \hsize=\linewidth \parskip=0pt
+      \manual@numberedcontentsline{#1}{#2}{#3}{#4}%
+      \expandafter\xdef\csname manual@lines@\the\manual@total\endcsname{%
+        \ifnum\prevgraf>0 \the\prevgraf\else 1\fi}%
+    }%
+    % Give the last line the same minimum depth as an ordinary single-spaced row.
+    \ifdim\dp\csname manual@box@\the\manual@total\endcsname<\manual@strutdepth
+      \dp\csname manual@box@\the\manual@total\endcsname=\manual@strutdepth
+    \fi
+  \fi
+}
+\newcommand{\manual@checkbreak}[1]{%
+  \manual@legaltrue
+  \manual@prior=#1\relax \advance\manual@prior\m@ne
+  \ifnum\manual@prior<\manual@start\else
+    % A chapter stays with its next entry; a section with its first subsection.
+    \ifnum\manual@level\manual@prior=0
+      \manual@legalfalse
+    \else\ifnum\manual@level\manual@prior=1
+      \ifnum\manual@level#1=2 \manual@legalfalse\fi
+    \fi\fi
+  \fi
+}
+\newcommand{\manual@validbreak}{%
+  \manual@checkbreak\manual@break
+  \ifmanual@legal\else
+    \advance\manual@break\m@ne
+    \expandafter\manual@validbreak
+  \fi
+}
+\newcommand{\manual@preferheading}{%
+  \manual@candidate=\manual@break
+  \manual@before=\manual@used
+  \manual@rank=3 \manual@rows=0 \manual@shift=0
+  \@whilenum\manual@candidate>\manual@start\do{%
+    \manual@checkbreak\manual@candidate
+    \ifdim\manual@before<\manual@needed \manual@legalfalse\fi
+    \ifmanual@legal
+      \ifnum\manual@level\manual@candidate=0
+        \ifnum\manual@rank>0
+          \manual@break=\manual@candidate \manual@rank=0 \manual@shift=\manual@rows
+        \fi
+      \else\ifnum\manual@level\manual@candidate=1
+        \ifnum\manual@rows<3
+          \ifnum\manual@rank>1
+            \manual@break=\manual@candidate \manual@rank=1 \manual@shift=\manual@rows
+          \fi
+        \fi
+      \fi\fi
+    \fi
+    \advance\manual@candidate\m@ne
+    \advance\manual@rows\manual@lines\manual@candidate\relax
+    \advance\manual@before-\manual@height\manual@candidate
+    \ifnum\manual@rows>3 \manual@candidate=\manual@start\fi
+  }%
+}
+\newcommand{\manual@fillcolumn}{%
+  \manual@used=0pt \manual@index=\manual@start
+  \manual@natural=\numexpr\manual@start-1\relax
+  \@whilenum\manual@index<\numexpr\manual@total+1\relax\do{%
+    \ifdim\dimexpr\manual@used+\manual@height\manual@index\relax>\manual@capacity
+      \manual@index=\numexpr\manual@total+1\relax
+    \else
+      \advance\manual@used\manual@height\manual@index
+      \manual@natural=\manual@index \advance\manual@index\@ne
+    \fi
+  }%
+  \manual@break=\numexpr\manual@natural+1\relax
+  \ifnum\manual@natural<\manual@total
+    \manual@validbreak
+    \manual@natural=\numexpr\manual@break-1\relax
+    \manual@used=0pt \manual@index=\manual@start
+    \@whilenum\manual@index<\manual@break\do{%
+      \advance\manual@used\manual@height\manual@index
+      \advance\manual@index\@ne
+    }%
+  \fi
+}
+\newcommand{\manual@layouttoc}{%
+  \manual@start=1 \manual@column=1
+  \@whilenum\manual@start<\numexpr\manual@total+1\relax\do{%
+    \manual@fullheight=\@colroom
+    \ifnum\manual@column>2 \manual@fullheight=\textheight\fi
+    \manual@capacity=\manual@fullheight \manual@needed=-\maxdimen
+    % Balance the final pair of columns without creating an extra page.
+    \ifodd\manual@column
+      \manual@remaining=0pt \manual@index=\manual@start
+      \@whilenum\manual@index<\numexpr\manual@total+1\relax\do{%
+        \advance\manual@remaining\manual@height\manual@index
+        \advance\manual@index\@ne
+      }%
+      \ifdim\manual@remaining>2\manual@fullheight\else
+        \manual@needed=\dimexpr\manual@remaining-\manual@fullheight\relax
+        \manual@capacity=.5\manual@remaining
+        \advance\manual@capacity .5\baselineskip
+      \fi
+    \fi
+    \manual@fillcolumn
+    \ifdim\manual@used<\manual@needed
+      \manual@capacity=\manual@fullheight \manual@needed=-\maxdimen
+      \manual@fillcolumn
+    \fi
+    \manual@shift=0
+    \ifnum\manual@natural<\manual@total
+      \manual@preferheading
+    \fi
+    \typeout{MANUALTOC column=\the\manual@column;
+      start=\the\manual@start; natural=\the\manual@natural;
+      next=\the\manual@break; shift=\the\manual@shift;
+      capacity=\the\manual@capacity}%
+    \manual@index=\manual@start
+    \@whilenum\manual@index<\manual@break\do{%
+      \nointerlineskip
+      \box\csname manual@box@\the\manual@index\endcsname
+      \penalty\@M
+      \advance\manual@index\@ne
+    }%
+    \manual@start=\manual@break
+    \ifnum\manual@start<\numexpr\manual@total+1\relax
+      \columnbreak
+      \advance\manual@column\@ne
+    \fi
+  }%
+}
+\renewcommand{\manualtoc}{%
+  \begingroup
+    \setstretch{1}\setlength{\parskip}{0pt}%
+    \manual@strutheight=\ht\strutbox \manual@strutdepth=\dp\strutbox
+    \manual@total=0
+    \let\manual@savedcontentsline\contentsline
+    \let\contentsline\manual@contentsline
+    \raggedcolumns
+    \begingroup
+      \makeatletter
+      \@input{\jobname.toc}%
+      \manual@layouttoc
+      \if@filesw
+        \expandafter\newwrite\csname tf@toc\endcsname
+        \immediate\openout\csname tf@toc\endcsname\jobname.toc\relax
+      \fi
+      \@nobreakfalse
+    \endgroup
+  \endgroup
+}
+\makeatother

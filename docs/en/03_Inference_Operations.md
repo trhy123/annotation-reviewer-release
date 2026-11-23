@@ -1,17 +1,17 @@
-# 3 Detection Operations
+# 3 Inference Operations
 
 [Return to the main contents](00_Annotation_Reviewer_User_Manual.md)
 
 ## 3.1 Purpose and Startup Checks
 
-Detection uses a model to generate frame-by-frame candidates, then saves original detections or performs stable-identity postprocessing according to the selected mode. Before starting, check the video, model, classes, output directory, and device. Template matching in Tracking and this model inference are separate functions.
+Inference uses a model to generate frame-by-frame candidates, then saves original detections or performs stable-identity postprocessing according to the selected mode. Before starting, check the video, model, classes, output directory, and device. Template matching in Tracking and this model inference are separate functions.
 
 ## 3.2 Controls
 
-Detection has two subtabs:
+Inference has two subtabs:
 
 - **Control**: Output directory, mode, Settings, Batch, Choose raw, Start/Pause/Stop, Load, progress, device, half, batch size, pipeline, wait time, Workers, and Follow progress.
-- **Inference**: Contains only model information and YOLO parameters. Below Model are the model family, training size, and Training info button. Reading occurs in a separate process without inference. Load only trusted .pt files; other formats or missing metadata are shown as unavailable rather than fabricated.
+- **Model**: Contains model information and YOLO parameters. Below Model are the model family, training size, and Training info button. Reading occurs in a separate process without inference. Load only trusted .pt files; other formats or missing metadata are shown as unavailable rather than fabricated.
 
 Metadata is reread after switching models. The reader process uses only CPU and does not occupy the CUDA device used for actual inference. Reading failures or timeouts exceeding 45 seconds show unavailable; hover to see the reason and reselect the model to retry. Older read results do not overwrite a new model selection.
 
@@ -37,7 +37,7 @@ Mouse-wheel value changes are disabled in input fields; hovering over option lab
 
 ## 3.3 Two Parameter Categories
 
-### 3.3.1 Inference: Parameter Changes and Rerunning Inference
+### 3.3.1 Model Parameters and Rerunning Inference
 
 - **Conf floor**: Upstream YOLO confidence threshold. Lowering it retains more candidates but may increase false detections and computation.
 - **IoU**: Upstream YOLO NMS threshold, not the postprocessing matching IoU threshold.
@@ -73,7 +73,7 @@ Raw consists of detections already output by YOLO/tracker and saved before custo
 
 When a cache is mounted, clicking **Choose raw** again exits Raw / postprocessing cache preview and returns to the formal review layer without deleting the cache. To replace the cache, exit and click again to select one. Parameter changes alone do not trigger replay; compute manually with Center here / Update / Full replay in Postprocess settings.
 
-Parameter configuration and testing are in the separate **Postprocess settings** window. Before / After only prepares the range; Center here applies it and computes. Opening the window itself does not recompute. Completed intervals coexist with remaining Raw, and closing the window does not unload green range bands. Raw and results can both be explicitly edited; result changes are not written back to Raw by default. See [Postprocessing Tests](04_Detection_Postprocessing_Tests.md) for detailed Apply to Raw, Reprocess range, and Save preview workflows.
+Parameter configuration and testing are in the separate **Postprocess settings** window. Before / After only prepares the range; Center here applies it and computes. Opening the window itself does not recompute. Completed intervals coexist with remaining Raw, and closing the window does not unload green range bands. Raw and results can both be explicitly edited; result changes are not written back to Raw by default. See [Postprocessing Tests](04_Inference_Postprocessing_Tests.md) for detailed Apply to Raw, Reprocess range, and Save preview workflows.
 
 Follow progress follows detected frames. Boxes shown during detection are temporary results. During a run, the result database saves temporary postprocessed rows in batches; at completion, a transaction writes back data cleaned across the entire video. Use state in metadata to determine completeness. A rate of `0.45x` means approximately 0.45 seconds of video processed per second; paused time is excluded from active processing duration.
 
@@ -171,7 +171,7 @@ In the batch window, Start/Pause/Stop prioritizes selected items; without a sele
 
 Check video and cache identity, actual device, the upstream parameter snapshot, cache completeness, output location, and the distinction between raw/stable IDs. Spot-check dense targets, occlusions, rapid displacement, and class conflicts separately. Model detection confidence is not identity accuracy; longer stable IDs or smoother trajectories do not directly prove more accurate postprocessing.
 
-## 3.14 Command-Line Detection
+## 3.14 Command-Line Inference
 
 The main application provides a `detect` subcommand that calls the existing DetectionWorker without opening the Reviewer interface. Parameters are identical across platforms; see [Startup Commands](01_Basic_Operations.md#131-opening-videos-and-annotations-directly) for replacing the `Reviewer` entry point. Run `Reviewer detect --help` for command-line usage.
 

@@ -96,11 +96,11 @@ Display → Boutlist fields 仅保留两个编辑入口、启用数量摘要及�
 
 ### 13.5.1 读取
 
-Open Boutlist → 选择记录 → 核对 File 中实际路径 → 检查 Points 和 Match 参数 → 播放关键帧。字段映射只改变列名对应，不会修正错误视频配对或错误帧号。
+Open Boutlist → 选择记录 → 核对 File 中实际路径 → 检查 Markers 和 Match 参数 → 播放关键帧。字段映射只改变列名对应，不会修正错误视频配对或错误帧号。
 
 ### 13.5.2 回写
 
-1. 在 Points 或 Match 修改相关信息并确认。
+1. 在 Markers 或 Match 修改相关信息并确认。
 2. 执行 Sync to，或在程序提示回写时核对差异。
 3. 确认显示的目标行和实际列名。
 4. 完成后重新读取这一行验证。
@@ -142,7 +142,7 @@ Browse 按钮用于通过可视化选定文件而实现路径的便捷准确录�
 
 **操作示例：** 将某行 review_notes 从空白改为 `Capture pair checked`，点击主窗口后该单元格已保存并以系统强调色显示。关闭 Select bout 不会丢失此修改。重新打开并开启 Edit 后，按 ↶ 可恢复空白并写回文件；回到基准值后文字恢复正常颜色。
 
-修改当前 Bout 的元数据单元格只更新 Boutlist 及当前行定位快照，不会覆盖主窗口已载入的 Points、对齐或标定。需要读取新元数据时，执行对应的 Sync from。Open 当前行不会重新加载文件。
+修改当前 Bout 的元数据单元格只更新 Boutlist 及当前行定位快照，不会覆盖主窗口已载入的 Markers、对齐或标定。需要读取新元数据时，执行对应的 Sync from。Open 当前行不会重新加载文件。
 
 ### 13.5.5 单元格拖拽填充
 
@@ -170,7 +170,7 @@ Copy fill 将来源单元格的原始文本复制到目标格，包括前导零�
 
 回写只更新相应映射字段，其他列和未修改单元格的文本保持原样，例如标识 `001` 和自定义列 `1.2300` 不应因为更新 Capture 而被整体重新格式化。
 
-完整 `scale_calibration` JSON 始终写入输出标注 SQLite。Boutlist fields 中可独立指定 `scale_px_per_cm` 与 `scale_calibration` 列名，二者可以同时启用。另可启用 `info_points`、`info_events` 和 `camera_anchor_keyframes` JSON 列。在 Edit sync fields 中取消“启用/同步”并保存，该项停止读写，但保留列名及说明。默认行顺序按 Boutlist 的身份、视频信息、分析范围、位置、数据来源、对齐和备注排列；已保存的自定义顺序及映射优先。Points JSON 与单独标量字段并存时，非空的单独标量字段优先。加载标注 SQLite 时，元数据冲突仍通过原有对话框选择来源。
+完整 `scale_calibration` JSON 始终写入输出标注 SQLite。Boutlist fields 中可独立指定 `scale_px_per_cm` 与 `scale_calibration` 列名，二者可以同时启用。另可启用 `info_points`、`info_events` 和 `camera_anchor_keyframes` JSON 列。在 Edit sync fields 中取消“启用/同步”并保存，该项停止读写，但保留列名及说明。默认行顺序按 Boutlist 的身份、视频信息、分析范围、位置、数据来源、对齐和备注排列；已保存的自定义顺序及映射优先。Markers JSON 与单独标量字段并存时，非空的单独标量字段优先。加载标注 SQLite 时，元数据冲突仍通过原有对话框选择来源。
 
 核验字段通过 Boutlist fields → Edit review fields 配置。Enabled 让问题出现在 Verify 中；Sync 须先指定 Boutlist 列名。答案保存在对应的 Boutlist 行。窗口内的 Save settings 只启用并保存核验定义，不保存同步字段草稿或外部的保存前核验总开关。
 

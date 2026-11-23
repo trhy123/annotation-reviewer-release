@@ -4,17 +4,17 @@
 
 ## 5.1 范围与共同输入
 
-本册说明 Box、ID、Interpolate、Swap。Trajectory、Scale、Points/Events 各有独立分册。Edit 顶部的 ID、Range、x/y/w/h 为操作输入；它们与当前画面选择相关，但输入本身不立即改写标注。
+本册说明 Box、ID、Interpolate、Swap。Trajectory、Scale、Markers/Events 各有独立分册。Edit 顶部的 ID、Range、x/y/w/h 为操作输入；它们与当前画面选择相关，但输入本身不立即改写标注。
 
 ID 可输入指定身份；All IDs 将范围扩展到全部身份。Range 使用视频帧号，支持单帧、闭区间及逗号分隔多个区间，例如 `120-150,180,200-230`；All frames 指全部有效帧。批量操作前先检查这两个开关，避免把本意的一帧修正应用到整个视频。`120-` 这样的开放终点延伸至已有标注；Delete、Change ID、Change class 的确认信息显示各区间实际处理的首尾及不同帧的数量，不计无标注的视频尾部。
 
-点击公共区的 **Range:** 文字按钮，将范围重置为当前帧。ID 框按 Enter 或点击 **S** 选择身份时，保持 All frames 的当前状态；关闭 All frames 时保留已有 Range 输入。
+点击公共区的 **Range:** 文字可将范围重置为当前帧。ID 框按 Enter 或点击 **S** 选择身份时，保持 All frames 的当前状态；关闭 All frames 时保留已有 Range 输入。
 
-编辑提交计算期间可按 **Esc** 取消，焦点在输入框时也有效。取消后状态栏显示“操作已取消”，计算结果不写入标注和 History；连续编辑、Tracking 或 Trajectory 的待提交内容保留，可调整后重试。正常完成的计算仍按一次操作记录并支持撤销。
+编辑提交计算期间可按 **Esc** 取消操作，焦点在输入框时也有效。取消后状态栏会显示操作已取消，计算结果不写入标注和 History；连续编辑、Tracking 或 Trajectory 的待提交内容保留，可调整后重试。正常完成的计算仍按一次操作记录并支持撤销。计算期间可以切帧、拖动进度条、切换选项卡和使用不提交修改的控件。撤销、重做、Tracking 最终提交及 Match 准备／匹配计算也可按 Esc 取消。保存仅在准备阶段、开始写入前允许按 Esc 取消。
 
 x/y 为框中心、w/h 为尺寸，单位是原图像素。仅改变显示缩放或平移不会改写这些值。Link selection 控制一般选择与相关身份/范围的联动；显式输入后应以最终显示的 ID/Range 核对操作范围。
 
-启用确认时，All frames 关闭的范围确认窗口提供 **Apply on all**，可改为对全部帧执行；All frames 开启时提供 **Apply on Range**，可关闭 All frames 并仅对公共 Range 中显示的范围执行本次操作。普通 Yes 保持原作用域，No 取消。删除、改类、改号、合并及新增框沿用各自原有确认开关；不启用确认时不会额外拦截。Change position 仍只修改当前帧，不把一帧坐标复制到全轨迹。
+启用确认时，All frames 关闭的范围确认窗口提供 **Apply on all**，可改为对全部帧执行；All frames 开启时提供 **Apply on Range**，可关闭 All frames 并仅对公共 Range 中显示的范围执行本次操作。Yes 保持原作用域，No 取消。删除、改类、改号、合并及新增框沿用各自原有确认开关；不启用确认时不会额外拦截。Change position 仍只修改当前帧，不把一帧坐标复制到全轨迹。
 
 ## 5.2 Box：按空间范围选择
 
@@ -52,7 +52,7 @@ x/y 为框中心、w/h 为尺寸，单位是原图像素。仅改变显示缩放
 - All frames 开启：矩形用来找出身份，后续按这些身份的全部帧处理。此时不保留“只有进入矩形的帧”这一局部限制。
 - 开启 Accumulate 后，框选会追加匹配项。按住 Shift 松开鼠标可按当前帧范围减去命中的记录或 ID。关闭 Accumulate 时，框选替换原选择。
 
-退出 Choose range 不改变 All frames。其他选择或输入可能改变后续编辑作用域；需要连续执行多次修改时，重新框选并核对 ID／Range。Raw／后处理预览的数据层另见 [Detection 分册](04_Detection后处理测试操作说明.md)，不应混同为审阅主表。
+退出 Choose range 不改变 All frames。其他选择或输入可能改变后续编辑作用域；需要连续执行多次修改时，重新框选并核对 ID／Range。Raw／后处理预览的数据层另见 [Inference 分册](04_Inference后处理测试操作说明.md)，不应混同为审阅主表。
 
 快速拖框按鼠标松开的位置结算。矩形过小、坐标无效或区域没有匹配对象时，状态栏说明原因，并保留原有选择；不会把失败操作报告成成功选中零个 ID。
 
@@ -94,7 +94,7 @@ Continuous 编辑保持开启时，在画布右键仍提交当前帧的位置指
 
 Confirm 为三态控件，控制 Change position、Change class 与 Delete 执行前是否弹出确认窗口：勾选时三种操作均需确认；中间态仅 Change class 和 Delete 需要确认；未勾选时三种操作均不弹出确认窗口。它不设置标注行的人工确认状态。
 
-选择 Change class 的类别后点击相邻 Change，将类别应用于目标范围。Delete 删除作用范围内的标注；它不删除视频和磁盘原始文件，也不负责删除 Tracking 尚未提交的整个区间。
+选择 Change class 的类别后点击相邻 Change，将类别应用于目标范围。Delete 删除作用范围内的标注；它不删除视频和磁盘原始文件，也不负责删除 Tracking 尚未提交的整个区间。 点击 **Change class:** 可清空类别输入，不修改已有标注。
 
 Change class 的展开列表只包含 INI 配置的类别。控件本体汇总所选身份在工作表中的类别：全部为同一类别时显示该类别，包含两种及以上类别时显示 multiple；该提示不作为可选类别加入列表。统计按身份与数据修订缓存，不随播放或每次展开列表重新扫描操作 Range。实际修改仍遵循所选 ID、Range 及 All frames。
 
@@ -108,15 +108,15 @@ Confirm edit 的操作明细较长时使用可滚动的只读文本区，可选�
 
 ### 5.4.1 Merge ID
 
-Target 是保留的身份，Source 是并入的身份，点击 Source 可交换 Target 与 Source 输入。Select 用于画面点选身份对，Clear 清空 Source，Clear all 清空这组身份输入。时间轴的蓝色、绿色条带分别对应 Target 和 Source，红色表示同时存在的帧。
+Target 是保留的身份，Source 是即将并入的身份。点击 **Merge ID:** 可交换 Target 与 Source 输入；点击 **Target:** 或 **Source:** 可选中输入的 ID。Select 用于画面点选身份对，Clear 清空 Source，Clear all 清空这组身份输入。时间轴的蓝色、绿色条带分别对应 Target 和 Source，红色表示同时存在的帧。
 
-Source 允许多个 ID；Target 必须为单个 ID。双击 Source 输入框会在其下方展开可滚动的迷你输入 ID 表，原框仍可正常选择文字、复制和粘贴。迷你表支持 Ctrl／Shift 多选、Ctrl + A 全选；单击行会选中身份并跳到其就近出现帧，公共 ID、画面和表格高亮同步更新。在迷你表按 Delete 只从 Source 输入中移除所选 ID，不删除标注；Esc 隐藏迷你表。当前选项卡为 ID 子页时，Target 对应框加粗蓝色描边，Source 对应框加粗绿色描边，填写或删除输入后立即更新。该描边只用于此页的编辑提示，不改变保存的标注或其他页面的显示样式。
+Source 允许多个 ID；Target 必须为单个 ID。双击 Source 输入框会在其下方展开可滚动的迷你输入 ID 表，原框仍可正常选择文字、复制和粘贴。迷你表支持 Ctrl／Shift 多选、Ctrl + A 全选；单击行会选中身份并跳到其就近出现帧，公共 ID、画面和表格高亮同步更新。在迷你表按 Delete 只从 Source 输入中移除所选 ID，不删除标注；Esc 隐藏迷你表。当前选项卡位于 Edit 时，Target 对应框加粗蓝色描边，Source 对应框加粗绿色描边，填写或删除输入后立即更新。该描边在 Edit 各子页显示，仅作编辑提示，不改变保存的标注或显示样式设置。
 
 在 Edit 的任意子页，按键盘快捷键 **M** 将当前活动自动 ID 加入这组输入：Target 为空时先填 Target，否则追加到 Source，重复按不会移除。按键盘快捷键 **N** 从 Source 中移除当前活动 ID，但要求该 ID 仍被选中且在当前帧存在。M／N 不执行合并，输入与条带立即更新；文本框内保留正常文字输入。
 
 Merge 的主要工作是统一身份。它不会自动判断两个同帧框究竟哪个对应真实目标，也不能用来掩盖两个同时存在的不同个体。出现冲突时先检查相关帧，必要时缩小范围、删除重复框或使用 Swap。
 
-勾选 Interpolate between 复选框可在合并后自动插值补足相关身份段之间的缺口，至少一端须属于 Source；两端均为 Target 的缺口保持不变。已删除的标注按缺口处理，可以重新补间。勾选后，按所列 Target／Source 身份的完整出现段寻找空档并插值补齐。插值不受公共 Range 限制，但 ID 合并本身仍遵循当前 Range 或 All frames。例如 Target 在 100–120 帧、Source 在 140–160 帧，Range 为 140–160 时，合并 Source 的同时仍补齐 121–139 帧。
+勾选 Interpolate between 复选框可在合并后自动插值补足相关身份段之间的缺口：对至少一端原属 Source 的缺口进行插值，两端原属 Target 的缺口保持不变。已删除的标注按缺口处理，可以重新补间。Range／All frames 只控制哪些 Source 标注改为 Target；合并后将本次实际选定的 Source 标注并入 Target ，再按端点的原身份判断新组成的 Target 轨迹中哪些缺口可以补齐；插值本身不受 Range 限制。例如 Target 在 1–20 帧、Source 在 40–50 帧，Range=45- 时，仅 Source 第 45-50 帧改为 Target，随后补齐 Target 第 21–44 帧；Range 外的 Source 第 40-44 帧仍原样保留，且不作为 Target 的插值端点。
 
 #### 自动寻找可接续的片段
 
@@ -163,7 +163,7 @@ Duplicates 模式使用矩形宽高，而不是 Continuity 的 Distance 距离�
 
 同一列表可追加多批搜索结果。使用匹配范围时，一次选择同一个参照 ID 的重复候选；From ID 列可核对参照身份。继续改公共身份、Range、All frames 或数据后，原局部选择失效，应重新使用 Use matched frames。若明确改用 All frames／Apply on all，则按整个身份处理。
 
-公共 **ID**、公共 **Range** 和 Merge **Source** 输入框均可双击展开迷你表，再次双击同一输入框或按 Esc 收起；原输入框仍可复制粘贴。ID／Source 表支持单击定位及 Ctrl／Shift 多选。Range 表按输入中的帧段逐行列出，选中行可把这些段填回公共 Range 并关闭 All frames，单击定位到所点帧段；切帧不重新解析并收缩列表。Source 迷你表中的 Delete 只移除输入项，不删除标注；公共 ID／Range 迷你表不绑定 Delete，以避免误删。
+公共 **ID**、公共 **Range** 和 Merge ID 功能的 **Source** 输入框均可双击展开迷你表，再次双击同一输入框或按 Esc 收起；原输入框仍可复制粘贴。ID／Source 表支持单击定位及 Ctrl／Shift 多选。Range 表按输入中的帧段逐行列出，选中行可把这些段填回公共 Range 并关闭 All frames，单击定位到所点帧段；切帧不重新解析并收缩列表。Source 迷你表中的 Delete 只移除输入项，不删除标注；公共 ID／Range 迷你表不绑定 Delete，以避免误删。拖动迷你表的列标题可移动它；移动后切换选项卡仍保持展开。关闭后再次打开则恢复初始位置并清空表内选择，切换选项卡也会恢复为自动关闭。
 
 #### 确认范围与处理重叠
 
@@ -181,15 +181,15 @@ Duplicates 模式使用矩形宽高，而不是 Continuity 的 Distance 距离�
 
 窗口不占用主窗口焦点，可以切帧预览。红色条带覆盖上述各类冲突。同一段有三个及以上 ID 时，要逐次决定保留者，因此同一帧段可能有多个不同身份对的询问；序号／总数按实际需要的选择次数显示。所有冲突选择完成后，合并、冲突删除和可选补间一次提交，可整次撤销。
 
-### 5.4.2 Change entire 与 Change range
+### 5.4.2 Change ID
 
-在 Change ID 输入目标编号。Change entire 用于整条所选身份改号；Change range 只对指定范围改号，可把一段从原身份拆出。目标编号已存在时应处理重叠冲突，不把“输入成功”等同于“每帧唯一”。
+在 **Change ID** 输入目标编号。**Change** 按填写的 Range 范围改号。**Split** 按输入的范围改号；如果只填一个帧号，则从该帧开始沿播放方向改号，勾选 **Reverse** 时改该帧及更早的帧。若所选范围会产生重复 ID，窗口会显示重叠冲突区间，可选保留哪一方的框、跳过该区间或取消。点击 **Change ID:** 可清空目标编号输入。
 
 允许将多个所选自动 ID 一次改为同一编号；未选择的身份不受影响，整次改号可作为一步撤销。执行前检查目标编号与各来源、以及不同来源之间的同帧重复。目标编号仅在其他不重叠帧出现时不产生重复警告；确实会产生同帧多框时列出冲突帧并询问是否继续，取消则不执行任何部分。
 
 Duplicate ID 的 Find 用于检查同帧同 ID 的重复行。先定位重复帧，再根据图像判断保留哪一个。相同 ID 在不同帧出现是正常轨迹，不属于重复冲突。
 
-**例：ID 25 的后半段串到另一个体。** 将串号开始到结束的范围设入 Range，使用 Change range 分离这段，再与实际身份核对；如果两条轨迹在同一时刻互换，使用 Swap 更直接。
+**例：ID 25 的后半段串到另一个体。** 把串号开始的帧号填入 Range，正向播放状态下点击 Split，再与实际身份核对；如果两条轨迹在同一时刻互换，使用 Swap 更直接。
 
 ## 5.5 Interpolate：两端几何与补间
 
@@ -295,7 +295,7 @@ Begin 与 End 是实际交换区间的边界，包含两端；两帧相同可以
 
 **例如 A、B 的正确 ID 是 001、002，仅在 101、103、105、108–112、115 帧反复串号：** 使用身份正确的第 100、116 帧作为锚点，Range 设为 `101-115`，两端 ID 都填 `001,002`。Position 会尝试只修正其中明确错配的帧，保留其他正确帧。四只相邻目标发生连锁串号时，可填入四个 ID，通过同一套预览检查；其他未列出的目标不参与。
 
-Position 模式只修改结果身份，不移动、添加或删除框，不改变 Class 或 Raw ID。它处理当前已载入的审阅标注；Detection 的 Raw／临时后处理预览需先 Load result，避免把其他数据层当作主表修改。
+Position 模式只修改结果身份，不移动、添加或删除框，不改变 Class 或 Raw ID。它处理当前已载入的审阅标注；Inference 的 Raw／临时后处理预览需先 Load result，避免把其他数据层当作主表修改。
 
 ## 5.7 操作暂存
 
@@ -359,7 +359,7 @@ Merge Target／Source 可在目标页继续修改；本功能不推断手工轨�
 
 ## 5.8 后处理预览时的编辑保存
 
-在 Raw cache 或后处理预览中，需要先点击框确定来源，再使用这些输入。编辑 Raw 写入 Raw cache；编辑后处理框只修改结果副本，不自动修改 Raw cache 或原审阅标注。需回写时使用 Postprocess settings 的 Apply to Raw，随后手动 Reprocess range；保留结果使用 Save preview。取消参数窗口不撤销框编辑，撤销使用 Undo／Redo。详见[预览编辑与范围重算](04_Detection后处理测试操作说明.md#451-编辑-raw-与结果)。
+在 Raw cache 或后处理预览中，需要先点击框确定来源，再使用这些输入。编辑 Raw 写入 Raw cache；编辑后处理框只修改结果副本，不自动修改 Raw cache 或原审阅标注。需回写时使用 Postprocess settings 的 Apply to Raw，随后手动 Reprocess range；保留结果使用 Save preview。取消参数窗口不撤销框编辑，撤销使用 Undo／Redo。详见[预览编辑与范围重算](04_Inference后处理测试操作说明.md#451-编辑-raw-与结果)。
 
 ## 5.9 验收与保存
 

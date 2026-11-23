@@ -1,17 +1,17 @@
-# 3 Detection 操作说明
+# 3 Inference 操作说明
 
 [返回总目录](00_操作手册.md)
 
 ## 3.1 目的与启动检查
 
-Detection 使用模型产生逐帧候选，再按所选模式保存原始检测或执行稳定身份后处理。开始前核对视频、模型、类别、输出目录和设备。Tracking 模板匹配与此模型推理为不同功能。
+Inference 使用模型产生逐帧候选，再按所选模式保存原始检测或执行稳定身份后处理。开始前核对视频、模型、类别、输出目录和设备。Tracking 模板匹配与此模型推理为不同功能。
 
 ## 3.2 控制区
 
-Detection 分成两个子选项卡：
+Inference 分成两个子选项卡：
 
 - **Control**：输出目录、模式、Settings、Batch、Choose raw、Start/Pause/Stop、Load、进度，以及设备、half、批大小、管线、等待时间、Workers 和 Follow progress。
-- **Inference**：只放模型信息和 YOLO 参数。Model 下方显示模型家族、训练尺寸及 Training info 按钮。读取在独立进程中完成，不进行推理。只加载可信的 .pt 文件；其他格式或不存在的元数据会显示不可用，不编造。
+- **Model（模型）**：包含模型信息和 YOLO 参数。Model 下方显示模型家族、训练尺寸及 Training info 按钮。读取在独立进程中完成，不进行推理。只加载可信的 .pt 文件；其他格式或不存在的元数据会显示不可用，不编造。
 
 切换模型后重新读取元数据，读取进程仅使用 CPU，不占用正式推理的 CUDA 设备。读取失败或超过 45 秒时显示不可用，悬停查看原因；重新选择模型可重试。模型切换后的旧读取结果不覆盖新选择。
 
@@ -37,7 +37,7 @@ CPU 与内存约每秒更新，GPU 约每两秒更新。可唯一识别的 NVIDI
 
 ## 3.3 两类参数
 
-### 3.3.1 Inference：参数变化与重新推理
+### 3.3.1 Model 参数与重新推理
 
 - **Conf floor**：YOLO 上游置信度门槛。降低可保留更多候选，也可能增加误检及计算量。
 - **IoU**：YOLO 上游 NMS 阈值，不是后处理的匹配 IoU 阈值。
@@ -73,7 +73,7 @@ Raw 是 YOLO/tracker 已输出的检测，保存在自定义后处理之前；�
 
 缓存已挂载时，再次点击 **Choose raw** 退出 Raw／后处理缓存预览，返回正式审阅层，不删除缓存；需要更换缓存时退出后再点一次选择。参数修改本身不触发回放，使用 Postprocess settings 的 Center here／Update／Full replay 手动计算。
 
-参数设置与检验功能位于独立窗口 **Postprocess settings**。Before／After 只准备范围，点击 Center here 才应用并计算；打开窗口本身不重新计算。已完成区间与其余 Raw 共存，关闭窗口不卸载绿色范围条带。Raw 和结果均可显式编辑，结果修改默认不写回 Raw；Apply to Raw、Reprocess range 和 Save preview 的详细流程见[后处理测试说明](04_Detection后处理测试操作说明.md)。
+参数设置与检验功能位于独立窗口 **Postprocess settings**。Before／After 只准备范围，点击 Center here 才应用并计算；打开窗口本身不重新计算。已完成区间与其余 Raw 共存，关闭窗口不卸载绿色范围条带。Raw 和结果均可显式编辑，结果修改默认不写回 Raw；Apply to Raw、Reprocess range 和 Save preview 的详细流程见[后处理测试说明](04_Inference后处理测试操作说明.md)。
 
 Follow progress 用于跟随识别帧。识别中的框是临时结果；结果库运行时批量保存临时后处理行；结束时事务写回全片清理后的数据，以 metadata 中的 state 判断是否完整。速率 `0.45x` 表示每秒约处理 0.45 秒视频，暂停时间不计入活跃处理时长。
 
@@ -171,7 +171,7 @@ Start 启动当前设置对应的任务；Pause 暂停活动任务，保留其�
 
 检查视频与缓存身份、实际设备、上游参数快照、缓存是否完整、输出位置和 raw/stable ID 区别。对密集目标、遮挡、快速位移及类别冲突分别抽查。模型检测置信度不是身份正确率；更长稳定 ID 或更平滑轨迹也不能直接证明后处理更准确。
 
-## 3.14 命令行检测
+## 3.14 命令行调用 Inference
 
 主程序提供 `detect` 子命令，调用现有 DetectionWorker，不打开 Reviewer 界面。各平台参数一致，`Reviewer` 的入口替换方式见 [启动命令](01_基础操作说明.md#131-直接打开视频与标注)。命令行用法可运行 `Reviewer detect --help` 查看。
 

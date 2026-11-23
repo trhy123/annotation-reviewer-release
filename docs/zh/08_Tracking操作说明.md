@@ -15,9 +15,9 @@ Tracking 用于为一个指定目标建立、延续或修正逐帧位置记录�
 | `Edit → Trajectory` | 已有目标轨迹及选定帧段 | 预览后提交的轨迹坐标 | 局部曲线纠正、重绘、平滑、点分配及整体变换 |
 | Camera Anchor 追踪 | 选定背景锚点及其图像模板 | Camera 锚点的逐帧观测 | 为既有视野运动补偿提供位置观测 |
 
-Tracking、Detection 和 Match 的职责不同：Detection 从视频中检测目标并生成检测轨迹；Tracking 在指定 ID 下补充或修正位置；Match 处理导入手工轨迹与检测轨迹之间的对齐、匹配和绑定。Tracking 的 `Overwrite` 不执行跨 ID 合并，也不融合两条不同身份的轨迹。
+Tracking、Inference 和 Match 的职责不同：Inference 从视频中检测目标并生成检测轨迹；Tracking 在指定 ID 下补充或修正位置；Match 处理导入手工轨迹与检测轨迹之间的对齐、匹配和绑定。Tracking 的 `Overwrite` 不执行跨 ID 合并，也不融合两条不同身份的轨迹。
 
-本说明覆盖 Tracking 的全部操作入口，以及与其直接衔接的公共 Trajectory、Camera Anchor 追踪、轨迹显示和保存行为。Scale 标尺校准、Match 身份融合、Points/Events 事件记录的完整规程分别属于相应模块说明。
+本说明覆盖 Tracking 的全部操作入口，以及与其直接衔接的公共 Trajectory、Camera Anchor 追踪、轨迹显示和保存行为。Scale 标尺校准、Match 身份融合、Markers/Events 事件记录的完整规程分别属于相应模块说明。
 
 ## 8.2 坐标、帧号与数据状态
 
@@ -659,17 +659,17 @@ Edge 不识别 `bee`、`hornet` 等语义类别。在目标与背景颜色接近
 
 ### 8.12.4 YOLO
 
-使用 Detection 中配置的模型、Device、Half 等设置，通过外部 DetectionWorker 对局部 ROI 推理。模型按需加载并复用；不要求先对整个视频完成 Detection。
+使用 Inference 中配置的模型、Device、Half 等设置，通过外部 DetectionWorker 对局部 ROI 推理。模型按需加载并复用；不要求先对整个视频完成推理。
 
 操作规程：
 
-1. 在开始 Tracking 会话前，到 Detection 选择有效模型及运行设备。
+1. 在开始 Tracking 会话前，到 Inference 选择有效模型及运行设备。
 2. 确认目标类别与模型类别名称一致，名称比较忽略大小写。
 3. 回到 Tracking，将 `Assist` 设为 `YOLO`。
 4. 进行人工点选或 Auto。观察初始框及随后返回的细化结果。
 5. 状态提示模型不存在、类别不存在、设备错误或推理失败时，修正配置；已有初始框保留。
 
-局部候选先限定为同类别，并在包含初始点的候选中优先选择中心较近者；最终仍必须满足共同边界检查。ROI 推理使用自身的局部配置，不能假定所有全视频 Detection 参数都逐项作用于 Assist。模板匹配的 Score 阈值也不控制 YOLO 置信度。
+局部候选先限定为同类别，并在包含初始点的候选中优先选择中心较近者；最终仍必须满足共同边界检查。ROI 推理使用自身的局部配置，不能假定所有全视频推理参数都逐项作用于 Assist。模板匹配的 Score 阈值也不控制 YOLO 置信度。
 
 YOLO 支持运行环境可用的设备；选择 auto 时按检测环境的可用设备选择，CUDA 可用时可以使用 GPU。半精度只在支持的设备上生效。模板自动追踪本身仍使用 CPU/OpenCV，启用 GPU YOLO Assist 不会把模板匹配也变为 GPU 算法。
 
@@ -679,7 +679,7 @@ YOLO 支持运行环境可用的设备；选择 auto 时按检测环境的可用
 
 同帧重新标记、暂停、导航、切换 Assist、Finish 或 Cancel 后，失效结果不能再覆盖新的位置或已结束的会话。被接受的细化合并进其原始点操作的局部撤销记录，不额外增加一条点操作。
 
-全视频 Detection 运行时，ROI 辅助暂不可用，人工初始框仍可记录；全视频检测结束后可重新准备辅助模型。更换模型、设备或精度后，下一次辅助请求会按新配置准备 worker。
+全视频推理运行时，ROI 辅助暂不可用，人工初始框仍可记录；全视频推理结束后可重新准备辅助模型。更换模型、设备或精度后，下一次辅助请求会按新配置准备 worker。
 
 外部独立 DetectionWorker 必须支持 ROI 服务接口。旧的独立 worker 不支持时，状态行提示问题并保留初始框；不能据此推断原始人工标记失败。
 

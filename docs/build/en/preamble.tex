@@ -1,0 +1,107 @@
+% 全文排版规则；修改这里后运行 compile.ps1 即可生效。
+\usepackage[left=15mm,right=15mm,top=16mm,bottom=17mm,headheight=13pt,headsep=5mm,footskip=8mm]{geometry}
+\usepackage{fontspec,setspace}
+\usepackage[table]{xcolor}
+\IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{\setmainfont{TeX Gyre Termes}}
+\IfFontExistsTF{Arial}{\setsansfont{Arial}}{\setsansfont{TeX Gyre Heros}}
+\setmonofont{JetBrainsMono-Light.ttf}[Path=fonts/,Scale=1,BoldFont=JetBrainsMono-Regular.ttf,ItalicFont=JetBrainsMono-LightItalic.ttf,BoldItalicFont=JetBrainsMono-Italic.ttf,RawFeature={-calt}]
+\IfFontExistsTF{SimSun}{
+  \setCJKmainfont{SimSun}[BoldFont=SimHei,ItalicFont=KaiTi]
+  \newCJKfontfamily\tableheaderfont{SimSun}[AutoFakeBold=2]
+}{
+  \setCJKmainfont{Noto Serif CJK SC}[BoldFont=Noto Sans CJK SC,ItalicFont=FandolKai-Regular.otf]
+  \newCJKfontfamily\tableheaderfont{Noto Serif CJK SC}[AutoFakeBold=2]
+}
+\IfFontExistsTF{STZhongsong}{
+  \newCJKfontfamily\headingfont{STZhongsong}[AutoFakeBold=2]
+}{
+  \newCJKfontfamily\headingfont{Noto Serif CJK SC}[AutoFakeBold=2]
+}
+\IfFontExistsTF{Segoe UI Symbol}{\newfontfamily\symbolfont{Segoe UI Symbol}}{\newfontfamily\symbolfont{DejaVu Sans}}
+% 光学基线校准；保留字号和字宽。设为 0em 可还原。
+\newcommand{\CJKBaselineRaise}{0.05em}
+\renewcommand{\CJKsymbol}[1]{\raise\CJKBaselineRaise\hbox{#1}}
+\renewcommand{\CJKpunctsymbol}[1]{\raise\CJKBaselineRaise\hbox{#1}}
+\definecolor{accent}{HTML}{4472C4}
+\definecolor{muted}{HTML}{7F7F7F}
+\definecolor{tocmuted}{RGB}{128,128,128}
+\definecolor{sectionbg}{HTML}{D9E2F3}
+\definecolor{headingink}{HTML}{1F3763}
+\definecolor{rowshade}{HTML}{F2F2F2}
+\definecolor{tablerule}{HTML}{666666}
+\newcommand{\ContinuedTableText}{(continued)}
+\setstretch{1.03}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt plus 1pt minus 1pt}
+\hyphenpenalty=500
+\exhyphenpenalty=50
+\setcounter{secnumdepth}{-2}
+\setcounter{tocdepth}{2}
+\newcommand{\chapterband}[1]{\begingroup\setlength{\fboxsep}{5pt}\colorbox{accent}{\parbox{\dimexpr\linewidth-2\fboxsep\relax}{\raggedright\color{white}\strut#1\strut}}\endgroup}
+\newcommand{\sectionband}[1]{\begingroup\setlength{\fboxsep}{4pt}\colorbox{sectionbg}{\parbox{\dimexpr\linewidth-2\fboxsep\relax}{\raggedright\color{black}\strut#1\strut}}\endgroup}
+\newcommand{\subsectionline}[1]{\parbox{\linewidth}{\raggedright\color{headingink}#1\par\nobreak\vspace{1pt}{\color{accent}\hrule height 0.4pt}}}
+\ctexset{
+  chapter={format=\rmfamily\headingfont\fontsize{16}{21}\selectfont\bfseries,titleformat=\chapterband,beforeskip=0pt,afterskip=3pt,fixskip=true},
+  section={format=\headingfont\fontsize{12}{16}\selectfont,titleformat=\sectionband,beforeskip=10pt,afterskip=5pt},
+  subsection={format=\rmfamily\headingfont\fontsize{12}{16}\selectfont\bfseries,titleformat=\subsectionline,beforeskip=8pt,afterskip=2pt},
+  subsubsection={format=\rmfamily\headingfont\fontsize{11}{14}\selectfont\bfseries,beforeskip=6pt,afterskip=2pt},
+  paragraph={format=\rmfamily\headingfont\fontsize{10.5}{13}\selectfont\bfseries,beforeskip=5pt,afterskip=2pt},
+  subparagraph={format=\rmfamily\headingfont\fontsize{10.5}{13}\selectfont\bfseries,beforeskip=4pt,afterskip=2pt}
+}
+\usepackage{longtable,booktabs,array,calc,etoolbox,needspace}
+\setlength{\LTpre}{5pt}
+\setlength{\LTpost}{5pt}
+\setlength{\emergencystretch}{2em}
+\AtBeginEnvironment{longtable}{\normalsize\arrayrulecolor{tablerule}\setlength{\heavyrulewidth}{0.65pt}\setlength{\lightrulewidth}{0.5pt}\setlength{\cmidrulewidth}{0.4pt}\setlength{\tabcolsep}{5pt}\setlength{\extrarowheight}{1pt}\setlength{\aboverulesep}{0pt}\setlength{\belowrulesep}{0pt}\renewcommand{\arraystretch}{1.10}}
+\usepackage{amsmath,amssymb}
+\DeclareMathSizes{10.5}{11}{8}{6}
+\usepackage{enumitem}
+\setlist{topsep=3pt,itemsep=2pt,parsep=0pt,leftmargin=2.2em}
+\providecommand{\tightlist}{\setlength{\itemsep}{1pt}\setlength{\parskip}{0pt}}
+\usepackage{fvextra}
+\fvset{breaklines=true,breakanywhere=true,fontsize=\normalsize,baselinestretch=1.03}
+\AtBeginEnvironment{Verbatim}{\hyphenpenalty=50\exhyphenpenalty=50}
+\usepackage{graphicx}
+\usepackage{multicol,tocloft}
+\setlength{\columnsep}{8mm}
+\setlength{\columnseprule}{0.2pt}
+\setlength{\cftbeforechapskip}{3pt}
+\setlength{\cftbeforesecskip}{0pt}
+\setlength{\cftbeforesubsecskip}{0pt}
+\renewcommand{\cftchapfont}{\rmfamily\fontsize{12}{14.4}\selectfont\headingfont\bfseries}
+\renewcommand{\cftchappagefont}{\rmfamily\fontsize{12}{14.4}\selectfont\bfseries}
+\renewcommand{\cftsecfont}{\fontsize{10.5}{12.6}\selectfont}
+\renewcommand{\cftsecpagefont}{\fontsize{10.5}{12.6}\selectfont}
+\renewcommand{\cftsubsecfont}{\fontsize{9}{10.8}\selectfont\color{tocmuted}}
+\renewcommand{\cftsubsecpagefont}{\fontsize{9}{10.8}\selectfont\color{tocmuted}}
+\cftsetindents{chapter}{0pt}{0pt}
+\cftsetindents{section}{5pt}{0pt}
+\cftsetindents{subsection}{10pt}{0pt}
+\makeatletter
+\newcommand{\manualtoc}{\begingroup\setstretch{1}\hypersetup{linkcolor=black}\setlength{\parskip}{0pt}\@starttoc{toc}\endgroup}
+\makeatother
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{\footnotesize\color{muted}\nouppercase{\leftmark}}
+\fancyfoot[LE,RO]{\normalsize\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[LE,RO]{\normalsize\thepage}\renewcommand{\headrulewidth}{0pt}}
+\usepackage{xurl}
+\usepackage[unicode,colorlinks=true,linkcolor=accent,urlcolor=accent,bookmarksopen=true,bookmarksnumbered=false]{hyperref}
+\hypersetup{pdflang={en-US},pdftitle={Annotation Reviewer User Manual},pdfsubject={Operating instructions and data conventions}}
+\usepackage{bookmark}
+% PDF 书签：章为第一级，节为第二级，小节为第三级。
+\bookmarksetup{addtohook={%
+  \bookmarksetup{bold=false,color=black}%
+  \ifnum\bookmarkget{level}=0 \bookmarksetup{bold}\fi
+  \ifnum\bookmarkget{level}=2 \bookmarksetup{color=tocmuted}\fi
+}}
+\input{toc-style.tex}
+\widowpenalty=10000
+\clubpenalty=10000
+\raggedbottom
+\input{build-info.tex}
+\IfFileExists{tweaks.tex}{\input{tweaks.tex}}{}

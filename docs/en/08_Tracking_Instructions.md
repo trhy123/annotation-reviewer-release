@@ -15,9 +15,9 @@ Tracking creates, extends, or corrects frame-by-frame position records for a spe
 | `Edit → Trajectory` | An existing target trajectory and a selected frame interval | Trajectory coordinates committed after preview | Local curve correction, redrawing, smoothing, point redistribution, and overall transformation |
 | Camera Anchor tracking | A selected background anchor and its image template | Frame-by-frame observations of a Camera anchor | Providing position observations for existing camera motion compensation |
 
-Tracking, Detection, and Match serve different purposes: Detection detects targets in video and generates detection trajectories; Tracking supplements or corrects positions under a specified ID; Match handles alignment, matching, and binding between imported manual trajectories and detection trajectories. Tracking `Overwrite` does not merge IDs or combine trajectories with different identities.
+Tracking, Inference, and Match serve different purposes: Inference detects targets in video and generates detection trajectories; Tracking supplements or corrects positions under a specified ID; Match handles alignment, matching, and binding between imported manual trajectories and detection trajectories. Tracking `Overwrite` does not merge IDs or combine trajectories with different identities.
 
-These instructions cover all Tracking entry points and the directly related shared Trajectory functions, Camera Anchor tracking, trajectory display, and saving behavior. Complete procedures for Scale calibration, Match identity integration, and Points/Events recording are provided in the respective module instructions.
+These instructions cover all Tracking entry points and the directly related shared Trajectory functions, Camera Anchor tracking, trajectory display, and saving behavior. Complete procedures for Scale calibration, Match identity integration, and Markers/Events recording are provided in the respective module instructions.
 
 ## 8.2 Coordinates, Frame Numbers, and Data States
 
@@ -659,17 +659,17 @@ Edge does not recognize semantic classes such as `bee` or `hornet`. Results may 
 
 ### 8.12.4 YOLO
 
-Uses the model, Device, Half, and other settings configured in Detection to perform inference on a local ROI through the external DetectionWorker. The model is loaded on demand and reused; full-video Detection does not need to be completed first.
+Uses the model, Device, Half, and other settings configured in Inference to perform inference on a local ROI through the external DetectionWorker. The model is loaded on demand and reused; full-video Inference does not need to be completed first.
 
 Procedure:
 
-1. Before starting a Tracking session, select a valid model and execution device in Detection.
+1. Before starting a Tracking session, select a valid model and execution device in Inference.
 2. Confirm that the target class agrees with the model class name; name comparison is case-insensitive.
 3. Return to Tracking and set `Assist` to `YOLO`.
 4. Mark manually or run Auto. Observe the initial box and subsequent refinement result.
 5. If status messages report a missing model, missing class, device error, or inference failure, correct the configuration; the existing initial box is retained.
 
-Local candidates are first restricted to the same class; among candidates containing the initial point, those with nearer centers are preferred. The final result must still pass shared boundary checks. ROI inference uses its own local configuration; do not assume that every full-video Detection parameter applies individually to Assist. The template matching Score threshold also does not control YOLO confidence.
+Local candidates are first restricted to the same class; among candidates containing the initial point, those with nearer centers are preferred. The final result must still pass shared boundary checks. ROI inference uses its own local configuration; do not assume that every full-video Inference parameter applies individually to Assist. The template matching Score threshold also does not control YOLO confidence.
 
 YOLO supports devices available in the runtime; auto selects an available device in the detection environment and can use a GPU when CUDA is available. Half precision applies only on supported devices. Automatic template tracking itself still uses CPU/OpenCV; enabling GPU YOLO Assist does not turn template matching into a GPU algorithm.
 
@@ -679,7 +679,7 @@ Refinement does not wait for the next user click and does not guarantee YOLO pro
 
 After remarking the same frame, pausing, navigating, changing Assist, Finish, or Cancel, invalid results cannot overwrite new positions or ended sessions. Accepted refinements are merged into the original point operation's local undo record without adding a separate point operation.
 
-ROI assistance is temporarily unavailable during full-video Detection, but manual initial boxes can still be recorded; the assistance model can be prepared again after full-video detection ends. After changing the model, device, or precision, the next assistance request prepares a worker using the new configuration.
+ROI assistance is temporarily unavailable during full-video Inference, but manual initial boxes can still be recorded; the assistance model can be prepared again after full-video inference ends. After changing the model, device, or precision, the next assistance request prepares a worker using the new configuration.
 
 The external standalone DetectionWorker must support the ROI service interface. If an older standalone worker does not, the status line reports the issue and retains the initial box; this does not imply failure of the original manual mark.
 

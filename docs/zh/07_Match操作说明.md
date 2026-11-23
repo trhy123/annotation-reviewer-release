@@ -46,12 +46,14 @@ Match 与 Tracking 的模板搜索不同，也与 Edit → ID 的直接改号不
 时间轴的对齐算法为：
 
 $$
-\mathrm{capture\_frame} + \mathrm{sign} \times (\mathrm{trk\_frame} - \mathrm{trk\_capture\_frame}) \times \frac{\mathrm{det\_fps}}{\mathrm{trk\_fps}}
+\mathrm{video\_reference} + \mathrm{sign} \times (\mathrm{trk\_frame} - \mathrm{trk\_capture\_frame}) \times \frac{\mathrm{det\_fps}}{\mathrm{trk\_fps}}
 $$
 
 其中 `trk_reverse=True` 时 `sign=-1`。
 
-更改视频 Capture 时，已填写的 trk 标定参考帧同步增减 Capture 差值乘以 trk/video 帧率之比；勾选 reversed 时方向相反，因此已有手工点的对齐位置不变。参考值允许小数或落在原始样本范围外，留空表示未设置。Capture 与该联动一起撤销／重做；两边帧率相同时就是按相同帧数增减。
+公式中的 `video_reference` 来自 **align to video**。可填正整数帧号，也可填写 Frame 标记的引用，例如 `${analysis_start_frame}`。默认值 `${capture_frame}` 引用 Capture。输入固定帧号可独立于 Capture 对齐。输入框平时显示解析后的帧号，进入编辑时显示变量。留空恢复默认值。数字或引用保存在标注文件中，可按 `trk_video_reference` 映射与 Boutlist 同步。
+
+使用默认引用时，更改 Capture 会同步调整已填写的 trk 标定帧，改变量为 Capture 差值乘以 trk/video 帧率之比。勾选 reversed 时方向相反，已有手工点的对齐位置保持原样。trk 标定帧可填小数或原始样本范围外的值。
 
 ### 7.3.1 参数表
 
@@ -60,12 +62,12 @@ $$
 | Start-End range in trk | 参与处理的 Tracker 原始帧范围；不是视频 Range |
 | Fps of trk | 手工轨迹所用视频的帧率，用于按时间比例把手工帧映射到视频帧 |
 | reversed | 手工轨迹来自倒放视频时反向映射帧轴，如 Tracker 使用的是倒放视频标注，则需要勾选此选项 |
-| Calibration frame (capture) in trk | 人工时间轴中的事件参考帧，用作时间轴的对齐锚点，一般使用捕获帧 |
-| align to video | 同一事件在当前视频中的对应帧 |
+| Calibration frame in trk | 人工时间轴中的对齐参考帧 |
+| align to video | 当前视频中的对应帧号或 Frame 标记引用 |
 | Frame offset | 在基础映射上增加的视频帧偏移，向前为正 |
 | x/y offset | 人工点在原图坐标中的像素偏移，X 向右为正、Y 向下为正 |
 | Auto set offset | 按当前 timing 信息重新准备人工数据并估计对齐，可能改写现有偏移（frame/x/y offset），改写前会弹窗确认 |
-| Preview points | 使用当前偏移刷新人工点预览，不等于生成最终绑定 |
+| Preview points | 使用当前对齐参考和偏移刷新人工点预览 |
 | Sync from / Sync to | 从所选 Boutlist 记录读取或向其回写相关对齐字段 |
 
 ### 7.3.2 推荐操作规程

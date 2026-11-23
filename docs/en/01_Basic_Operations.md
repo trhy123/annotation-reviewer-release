@@ -13,7 +13,7 @@ When preparing files, retain the original videos and annotation files. Use separ
 | Video | Provides frame-by-frame images | Recording segment, resolution, first and last images, decoded frame count |
 | Annotation file (SQLite / CSV) | Stores annotation information (boxes, classes, IDs, etc.), metadata, and edit records | Frame numbers, correspondence with the video, coordinate units |
 | Manual trajectory (Tracker project .trk / converted CSV) | Provides manual identity and position references for Match | Whether the original video is reversed, manual trajectory frame rate, alignment frame |
-| raw SQLite cache | Replays Detection postprocessing | Original video path, committed frame range, upstream inference parameters |
+| raw SQLite cache | Replays Inference postprocessing | Original video path, committed frame range, upstream inference parameters |
 | Boutlist CSV | Organizes segments and metadata in batches | Field mapping, paths, record uniqueness |
 
 ## 1.2 Starting the Application and Identifying Windows
@@ -28,7 +28,7 @@ The source-build window title includes the process PID, for example `Annotation 
 
 ### 1.2.2 Running a Release Package
 
-Run the main application in the release package. Detection tasks are executed by a separate DetectionWorker; retain the dependency directories, presets, media runtime, and detection subprocess rather than copying only the main EXE. The `presets_detection/` directory in the release package root is the shared preset source for the GUI and Worker.
+Run the main application in the release package. Inference tasks are executed by a separate DetectionWorker; retain the dependency directories, presets, media runtime, and inference subprocess alongside the main executable. The `presets_detection/` directory in the release package root is the shared preset source for the GUI and Worker.
 
 ### 1.2.3 Locating the Configuration File
 
@@ -45,6 +45,8 @@ On macOS, `settings.ini` alongside the `.app` still takes priority; if absent, `
 The DetectionWorker subdirectory is not a separate configuration location. Use defaults adopts the class definitions in the platform template; locate the original configuration to retain the original project's classes and groups. When the configuration is missing, a file must be located, defaults selected, or startup canceled; the application does not silently adopt another project's configuration.
 
 ## 1.3 Opening Files
+
+The last row of the File tab edits the current unit name, with its label taken from the Boutlist mapping (for example bout, trial, or Event). Apply or Enter changes the name with undo support; Sync uses the existing confirmation to update only that mapped name in Boutlist. When opening an annotation with a matching Boutlist row, resolve any difference in the names in the Metadata conflict dialog. Names retain leading zeros and long digit sequences as text.
 
 ### 1.3.1 Opening Videos and Annotations Directly
 
@@ -85,7 +87,7 @@ On macOS, the system `open` command can also be used with the same parameter nam
 
 1. Configure column name mappings in Display → Boutlist fields first.
 2. Click Open Boutlist and select a record.
-3. Check the video, detection file, and manual trajectory paths; unavailable sources may remain empty.
+3. Check the video, annotation file, and manual trajectory paths; unavailable sources may remain empty.
 4. Check Start, End, Capture, manual trajectory alignment, and the scale summary.
 5. If multiple candidate records refer to the same file, explicitly select the current bout; do not synchronize metadata from another row to the current segment.
 
@@ -117,7 +119,7 @@ Buttons, titles, column names, built-in statuses, and phases use the language se
 
 **Startup Methods**
 
-For **verification of an entire list**, use `--review-queue` rather than passing the verification CSV directly as an annotation file. Replace `Reviewer` with the entry point described under “Opening Videos and Annotations Directly”:
+To open a review list in the app, choose **Open Review queue** in the menu beside **Open Boutlist**. From the command line, use `--review-queue` and replace `Reviewer` with the entry point described under “Opening Videos and Annotations Directly”:
 
 ```text
 Reviewer --review-queue "data/review_examples.csv"
@@ -140,7 +142,7 @@ Reviewer --review-queue "data/review_queue.csv" --boutlist "data/field_boutlist.
 
 Reviewer treats the specified Boutlist as open and matches each queue entry to a unique row using its bout ID. The queue can omit `detection_file` when the matched Boutlist row provides it. If both tables specify a file, the paths must resolve to the same annotation. Unmatched entries and file conflicts are disabled in gray. Hover over the row for the reason.
 
-**Save** writes the target SQLite and synchronizes changed Points fields such as Capture, Victim and nest coordinates to the mapped Boutlist columns. **Verify** writes the enabled, mapped verification fields with Sync turned on. With `--review-queue` alone, the queue supplies the annotation path and saves its own entry statuses. Boutlist synchronization requires an explicit `--boutlist`.
+With an explicit `--boutlist`, **Save** also synchronizes changed Markers fields such as Capture, Victim and nest coordinates, and verifies that the annotation file still matches the chosen row. **Verify** and **Verify review status before saving** are also available when the queue opens from annotation paths alone. In that case, verification fields can be written if exactly one row in the configured Boutlist resolves to the open annotation file. Otherwise the dialog explains why they cannot be saved. Normal / Fixed / Pending stay in the queue CSV; verification answers stay in the Boutlist.
 
 Placing `review_queue.csv` in the source root or alongside the executable also enables it automatically at startup. Explicit arguments take priority; this window is not shown when neither a file nor arguments are present. Indices start at 0. On macOS, the default list location is the application's writable data directory.
 
@@ -249,7 +251,7 @@ Free dragging of the progress bar must begin within the progress bar area; after
 
 ### 1.4.1 Timestamp Gaps and Image Numbers
 
-Detection and annotation use consecutive numbers in actual decoding order, with the first image numbered frame 1. A jump in container timestamps between adjacent images does not insert nonexistent annotation frames. For example, if adjacent image timestamps differ by 0.756 seconds, they still have adjacent numbers as long as the decoded images are consecutive.
+Inference and annotation use consecutive numbers in actual decoding order, with the first image numbered frame 1. A jump in container timestamps between adjacent images does not insert nonexistent annotation frames. For example, if adjacent image timestamps differ by 0.756 seconds, they still have adjacent numbers as long as the decoded images are consecutive.
 
 The image index is built asynchronously. If a target image has not yet been confirmed during paused seeking, the confirmed image is retained to prevent old images from being paired with new annotations. `Frame mapping pending` means image identity still awaits verification; estimated time cannot replace formal image identity in the final save. Existing CSV files are not renumbered by guesswork merely because they are opened.
 
@@ -289,7 +291,7 @@ Finish in Tracking, Apply in Trajectory, and Apply in Scale commit the current o
 1. Complete the current edit: use Finish/Cancel in Tracking, Apply/Discard in Trajectory, and Apply or cancel in Scale; end Continuous editing.
 2. Check keyframes, both trajectory ends, identity transitions, and metadata.
 3. Click Save (Ctrl + S) to write back to the current SQLite file, retaining its filename without appending a date and time. When formally saving an old CSV for the first time, select a SQLite destination; the default filename contains no date and time.
-4. Use Save as (Ctrl + Shift + S) to retain an intermediate version or export a legacy format. The default filename has a `YYYYMMDD_HHMMSS` suffix. Choose SQLite result or Legacy CSV. In Edit → Points, enable `Target only` to save final annotations within Start–End. With the option cleared, both save commands include all working annotations. This option is independent of the save verification switch.
+4. Use Save as (Ctrl + Shift + S) to retain an intermediate version or export a legacy format. The default filename has a `YYYYMMDD_HHMMSS` suffix. Choose SQLite result or Legacy CSV. In Display → Others → Save, enable `Target only` to save final annotations within the analysis intervals defined in Markers. With the option cleared, both save commands include all working annotations. This option is independent of the save verification switch.
 5. When save verification is enabled, record the actual verification status of each item in the window; only questions enabled in Display → Boutlist fields are shown. Incomplete items may remain unchecked; do not falsely claim verification merely to save. After Confirm, wait for the background success message; Back cancels saving. CSV is provided only for compatibility export; see 1.5.5.
 6. If prompted to write back to Boutlist, check the record and fields before choosing; this is separate from writing the annotation SQLite file.
 7. Reopen the output and spot-check keyframes and metadata.
@@ -302,13 +304,13 @@ With segment output selected, Save synchronizes the current result database's fi
 
 **Example:** With Start=1, End=112, and a 248-frame video, selecting this option and clicking Save retains only frame=1–112 in the current database's final annotations; annotations for frames 113–248 remain in the current in-memory session. Unchecking the option and saving again before closing saves the complete current in-memory working table. After reopening the segment database, unchecking the option cannot restore unloaded annotations outside the range. Original detections and row-level save history provide provenance and are not automatically injected into working annotations.
 
-The data-area table is a viewing and selection interface. Save / Save as saves the current working annotations rather than exporting the currently highlighted table cells. The working table and original raw data are saved in separate tables; raw rows are not mixed into working annotations. A loaded project or the detection cache for the same current video is included in the result database when saving SQLite; explicitly Load result in Detection first when postprocessed results are required.
+The data-area table is a viewing and selection interface. Save / Save as saves the current working annotations rather than exporting the currently highlighted table cells. The working table and original raw data are saved in separate tables; raw rows are not mixed into working annotations. A loaded project or the detection cache for the same current video is included in the SQLite annotation file at save time; explicitly Load result in Inference first when postprocessed results are required.
 
 `info_points`, `info_events`, `scale_calibration`, and similar fields store analysis metadata. The complete Scale JSON is saved in the annotation file; Boutlist can write back both a short scale summary and the complete JSON according to field mappings. Do not retain only x/y while deleting identity and source fields and then treat the file as a complete reviewed project.
 
 ### 1.5.4 Result Databases and Incremental Saving
 
-Each video uses one SQLite result file containing final working annotations, metadata, and operation records; original raw detections, when available, are embedded in the same file. Working annotations can be fully saved and edited without raw data, but Detection postprocessing cannot be rerun from them. When raw data is already embedded in the project, saving as or moving the result does not require an external raw cache, result JSON, or `_edit_log.txt`.
+Each video uses one SQLite annotation file containing final working annotations, metadata, and operation records; original raw detections, when available, are embedded in the same file. Working annotations can be fully saved and edited without raw data, but Inference postprocessing cannot be rerun from them. When raw data is already embedded in the project, saving as or moving the result does not require an external raw cache, result JSON, or `_edit_log.txt`.
 
 | Table | Saved Contents |
 | --- | --- |
@@ -319,7 +321,7 @@ Each video uses one SQLite result file containing final working annotations, met
 | `manual_edits` | Before/after contents and transaction numbers for rows added, modified, or deleted at each save |
 | `save_transactions` | Save time, transaction type, and counts of additions, deletions, and modifications |
 | `events` | Ordered event records |
-| `metadata` | Video information, Points, complete Scale, Camera, parameters, and source information |
+| `metadata` | Video information, Markers, complete Scale, Camera, parameters, and source information |
 | `history` | Displayable operation history |
 | `history_commands` | Legacy command archive, cleared by GUI saves |
 | `history_undo` | Replay state for full saves, tied to the committed revision |
@@ -328,11 +330,11 @@ The in-memory DataFrame and edit/undo behavior remain unchanged. Save / Save as 
 
 When saving ordinary edits to the current file again, only added/modified rows and deleted UIDs are frozen by stable UID; the complete working table is not deep-copied or staged. Events, metadata, operation history, and working rows are committed in one transaction and rolled back on failure. Edits made during saving remain unsaved. Initial conversion, saving as a new database, segment export, and some batch modifications/undo operations may still require full snapshots and comparison. If another instance has updated the file, overwriting its new version is refused.
 
-On the first save or Save as, the application builds and commits a temporary database in the destination directory, then publishes it under the selected filename after success. Selecting an existing file in Save as and confirming overwrite replaces the destination completely without retaining unrelated old working annotations or metadata; segment output can also overwrite the current file after confirmation. Failure preserves the original destination and current in-memory edits. Normal Save continues to use SQLite transactions and version checks; if another application modifies the destination during saving, overwriting stops and a recheck is requested.
+During the process of saving, the status bar and lower-right progress indicator show each save stage: preparing, writing, committing the SQLite transaction, and finishing. Press **Esc** while preparing to cancel before the destination is touched. Once writing starts, it cannot be canceled. SQLite saves write directly to the selected database in a transaction. **Save as** can overwrite an existing database after confirmation. A failed transaction preserves previously committed annotations; normal **Save** also checks the saved revision to avoid overwriting another process’s changes.
 
 Saving prioritizes raw data already embedded in the project. If an associated raw file is unavailable, three choices appear before saving: **Locate raw...** specifies the original cache or a result database embedding the same raw data and checks the recorded source identity; **Save without raw** saves only working annotations, metadata, and operation history; **Cancel** cancels this save and retains unsaved edits. Canceling the file dialog after choosing to locate a file also cancels this save. Projects with no previous raw association save directly without repeated prompts; after explicitly discarding raw data and saving successfully, subsequent saves no longer require recovery of that external file.
 
-The `.sqlite-wal` transaction log and `.sqlite-shm` shared index may appear during writing. After saving annotations, the application attempts to merge committed logs into the main database and return to ordinary journal mode; when no other connections are using the database, only the result file remains. WAL is retained when Detection or another connection is still using the database to support concurrent reads and writes. Do not manually delete these auxiliary files while they are in use.
+The `.sqlite-wal` transaction log and `.sqlite-shm` shared index may appear during writing. After saving annotations, the application attempts to merge committed logs into the main database and return to ordinary journal mode; when no other connections are using the database, only the result file remains. WAL is retained when Inference or another connection is still using the database to support concurrent reads and writes. Do not manually delete these auxiliary files while they are in use.
 
 On normal exit, the application also attempts this safe finalization for open result databases. Auxiliary files are retained when another instance is still using the database, the directory is not writable, or the database is unavailable; they are not forcibly deleted. Their presence does not mean the entire result is exclusively locked; ordinary journal mode also retains SQLite transactions and file locking.
 
@@ -340,21 +342,21 @@ If the result file is moved or deleted while open, the in-memory working annotat
 
 Deleting a recovery snapshot deletes only the selected snapshot. Directory cleanup is allowed only for recovery session directories managed by the application; annotations, videos, and other files beside external manual snapshots are excluded from cleanup. A recovery directory containing SQLite or other non-recovery files is retained.
 
-**Compact save** in Edit → Points cycles through three SQLite save modes.
+**Compact save** under Display → Others → Save cycles through three SQLite save modes.
 
 | State | Saved data |
 | --- | --- |
 | Unchecked (default) | Complete result, concise log, row-level audit, and the Undo/Redo state for reopening the project. Reopening a valid undo archive selects this mode again. |
 | Partly checked | Result, concise log, and row-level audit. Saved history appears in gray after reopening. |
-| Checked | Current annotations and required metadata, including Points, Events, Scale, Camera, and saved manual trajectory data. |
+| Checked | Current annotations and required metadata, including Markers, Events, Scale, Camera, and saved manual trajectory data. |
 
-All three modes retain the current in-memory Undo/Redo stack and follow the existing Raw choice. With **Target only**, the unchecked and partly checked states save the segment with logs and audits. CSV always uses compact export. Compact SQLite saving builds and vacuums a temporary database before replacing the destination. A failure preserves the original file.
+All three modes retain the current in-memory Undo/Redo stack and follow the existing Raw choice. With **Target only**, the unchecked and partly checked states save the segment with logs and audits. CSV always uses compact export. Compact SQLite saving reclaims unused space in the selected database. Save the two defaults to settings.ini using the Others scope in Display.
 
 Legacy CSV can be opened, appended, or used to replace a source. After importing, save as `.sqlite` to complete conversion; the original CSV is retained. To retain both a full database and a segment, use Save as to output a separate database; segments always retain original frame numbers.
 
 ### 1.5.5 Legacy CSV Compatibility Export
 
-Legacy CSV in Save as outputs a UTF-8 BOM frame-by-frame result table with annotation fields and required metadata. Video information and Points, Events, Scale, and Camera JSON are written to the first row and to a same-name `.metadata.json` file. Keep that sidecar with the CSV, including for empty tables. Range export includes both endpoints and preserves original frame numbers.
+Legacy CSV in Save as outputs a UTF-8 BOM frame-by-frame result table with annotation fields and required metadata. Video information and Markers, Events, Scale, and Camera JSON are written to the first row and to a same-name `.metadata.json` file. A CSV with annotation rows can be reopened from its embedded JSON alone. Keep the sidecar for an empty table. Range export includes both endpoints and preserves original frame numbers.
 
 CSV is a compact interchange format for results. Use SQLite to keep raw detections, audit records, and cross-session Undo/Redo. Exporting preserves the current working file path and unsaved state. CSV reimport reads complex objects in unknown extra columns as JSON text, and type inference may change leading zeros or null values.
 
@@ -365,14 +367,14 @@ CSV is a compact interchange format for results. Use SQLite to keep raw detectio
 | Setting | Meaning |
 | --- | --- |
 | Export Range | Inclusive frame range; supports `1-2990`, `-2990`, and `1-` |
-| From Start to End | Uses the analysis boundaries in Points; unchecking restores the manual range |
+| From Start to End | Includes the analysis intervals in Markers and their endpoints, skipping the gaps between intervals. Unchecking restores the manual range |
 | Picture range | Left X is the selection's left-edge horizontal coordinate and Top Y its top-edge vertical coordinate, both in pixels relative to the top-left corner of the complete output canvas; W/H is the selection width/height. Defaults to the full image; uses expanded-canvas coordinates when Expanded motion canvas is enabled |
 | Select area | Draws and adjusts the export region on the main image; click again to finish. The dark masked area is excluded from output |
 | FFmpeg / Browse | Specifies an FFmpeg executable with the required encoders |
 | Encoder | Video encoder, such as libx264 or an available hardware encoder |
 | Preset | Speed versus compression-efficiency tradeoff for the selected encoder |
 | Quality | Quality parameter for the selected encoder; not detection confidence, and values should not be compared directly across encoders |
-| Render workers | CPU worker parallelism for exporting Overlay, not inference parallelism for Detection |
+| Render workers | CPU worker parallelism for exporting Overlay, not inference parallelism for Inference |
 
 ### 1.6.2 Export Procedure and Checks
 
